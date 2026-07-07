@@ -38,7 +38,7 @@ const defaultFilters: Filters = {
 function CategoryPageSkeleton() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
         <Skeleton className="h-9 w-32 mb-6" />
         <div className="flex items-center gap-4 mb-8">
           <Skeleton className="h-14 w-14 rounded-2xl" />
@@ -47,7 +47,7 @@ function CategoryPageSkeleton() {
             <Skeleton className="h-4 w-72 mt-2" />
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Skeleton key={i} className="h-64 rounded-xl" />
           ))}
@@ -130,7 +130,7 @@ export default function CategoryPage() {
 
   if (!category) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto max-w-6xl px-4 py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
         <BackButton fallback="/categories" label="Back to Categories" className="mb-6" />
         <CartoonEmpty
           variant="shelf"
@@ -148,7 +148,7 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
         <BackButton fallback="/categories" label="Back to Categories" className="mb-6" />
 
         <motion.div
@@ -193,7 +193,7 @@ export default function CategoryPage() {
             initial="hidden"
             animate="show"
             variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
           >
             {filteredListings.map((listing) => (
               <motion.div

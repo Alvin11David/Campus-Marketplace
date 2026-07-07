@@ -81,7 +81,7 @@ export default function MyListingsPage() {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-6xl mx-auto px-4 py-8 space-y-6"
+      className="max-w-6xl mx-auto px-4 py-8 space-y-6 3xl:max-w-[1600px] 4xl:max-w-[1920px]"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function MyListingsPage() {
           ) : undefined}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 gap-4">
           <AnimatePresence mode="popLayout">
             {filteredListings.map((listing) => (
               <motion.div

@@ -110,7 +110,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12 4xl:max-w-4xl">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton className="-ml-1" />

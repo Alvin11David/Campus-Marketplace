@@ -154,11 +154,11 @@ export default function ListingDetailPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
       <BackButton fallback="/my-listings" />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 3xl:grid-cols-4 gap-8">
+        <div className="lg:col-span-2 3xl:col-span-3 space-y-6">
           <Card className="overflow-hidden border-primary/5">
             <div className="relative bg-muted">
               <div className="aspect-[16/9] flex items-center justify-center overflow-hidden">
@@ -466,7 +466,7 @@ export default function ListingDetailPage() {
               </Link>
             </Button>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5">
             {relatedListings.map((related) => (
               <ListingCard key={related.id} listing={related} />
             ))}

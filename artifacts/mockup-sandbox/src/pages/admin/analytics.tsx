@@ -96,7 +96,7 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (

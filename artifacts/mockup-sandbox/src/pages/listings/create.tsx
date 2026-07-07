@@ -101,7 +101,7 @@ export default function CreateListingPage() {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-3xl mx-auto px-4 py-8 space-y-8"
+      className="max-w-3xl mx-auto px-4 py-8 space-y-8 4xl:max-w-4xl"
     >
       <div className="flex items-center gap-4">
         <BackButton fallback="/my-listings" label="Cancel" />

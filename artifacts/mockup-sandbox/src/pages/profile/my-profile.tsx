@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 
 function ProfileSkeleton() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8 4xl:max-w-4xl">
       <Skeleton className="h-8 w-20" />
       <Skeleton className="h-40 rounded-xl" />
       <Skeleton className="h-64 rounded-xl" />
@@ -115,7 +115,7 @@ export default function MyProfilePage() {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-3xl mx-auto px-4 py-8 space-y-8"
+      className="max-w-3xl mx-auto px-4 py-8 space-y-8 4xl:max-w-4xl"
     >
       <div className="flex items-center justify-between">
         <BackButton />
@@ -198,7 +198,7 @@ export default function MyProfilePage() {
           <CardDescription>Update your personal information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 3xl:grid-cols-4 gap-5">
             <div className="space-y-2">
               <Label htmlFor="full_name">Full Name</Label>
               <Input
@@ -284,7 +284,7 @@ export default function MyProfilePage() {
       </Card>
 
       {/* Quick links */}
-      <StaggerFade className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <StaggerFade className="grid grid-cols-1 sm:grid-cols-2 3xl:grid-cols-3 gap-4">
         <StaggerItem index={0}>
           <Card
             className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"

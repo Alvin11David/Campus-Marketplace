@@ -136,7 +136,7 @@ export function Navbar() {
           <span className="hidden sm:inline font-bold text-lg tracking-tight">CampusMarket</span>
         </Link>
 
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4 3xl:max-w-xl 4xl:max-w-2xl">
           <div className="relative w-full group">
             <Search className={cn(
               "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-all duration-300",

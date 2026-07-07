@@ -35,7 +35,7 @@ const item = {
 export default function CategoriesPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
         <div className="flex items-start gap-3 mb-8">
           <BackButton className="-ml-1 mt-1" />
           <motion.div
@@ -55,7 +55,7 @@ export default function CategoriesPage() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
         >
           {MOCK_CATEGORIES.map((category, i) => {
             const iconName = CATEGORY_ICONS[category.name] || "Package";

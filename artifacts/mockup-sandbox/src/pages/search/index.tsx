@@ -119,7 +119,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
         <div className="flex items-center gap-3 mb-8">
           <BackButton className="-ml-1" />
           <motion.div
@@ -131,7 +131,7 @@ export default function SearchPage() {
             <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
 
           <form onSubmit={handleSearch} className="mt-4 flex items-center gap-2">
-            <div className="relative flex-1 max-w-md group">
+            <div className="relative flex-1 max-w-md group 3xl:max-w-xl 4xl:max-w-2xl">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 value={editQuery}
@@ -160,7 +160,7 @@ export default function SearchPage() {
         )}
 
         {searching && query ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-3">
                 <Skeleton className="aspect-[16/9] w-full rounded-xl" />
@@ -170,7 +170,7 @@ export default function SearchPage() {
             ))}
           </div>
         ) : results.length > 0 ? (
-          <StaggerFade className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StaggerFade className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5">
             {results.map((listing, i) => (
               <StaggerItem key={listing.id} index={i}>
                 <ListingCard listing={listing} />

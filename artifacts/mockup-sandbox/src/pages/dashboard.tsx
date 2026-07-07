@@ -45,17 +45,17 @@ function DashboardSkeleton() {
           <Skeleton className="h-4 w-48 mt-2" />
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        <Skeleton className="md:col-span-1 h-44 rounded-xl" />
-        <Skeleton className="md:col-span-1 h-44 rounded-xl" />
-        <Skeleton className="md:col-span-2 h-44 rounded-xl" />
+      <div className="grid gap-4 md:grid-cols-4 3xl:grid-cols-6">
+        <Skeleton className="md:col-span-1 3xl:col-span-1 h-44 rounded-xl" />
+        <Skeleton className="md:col-span-1 3xl:col-span-1 h-44 rounded-xl" />
+        <Skeleton className="md:col-span-2 3xl:col-span-2 h-44 rounded-xl" />
       </div>
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Skeleton className="h-6 w-6" />
           <Skeleton className="h-6 w-48" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-64 rounded-xl" />
           ))}
@@ -107,8 +107,8 @@ export default function Dashboard() {
       </div>
 
       {/* Bento Grid */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="md:col-span-1 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/5">
+      <div className="grid gap-4 md:grid-cols-4 3xl:grid-cols-6">
+        <Card className="md:col-span-1 3xl:col-span-1 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/5">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -139,7 +139,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-1 border-primary/5">
+        <Card className="md:col-span-1 3xl:col-span-1 border-primary/5">
           <CardContent className="p-5">
             <Link to="/notifications" className="flex items-center gap-2 mb-4 group">
               <div className="p-2 rounded-lg bg-secondary/10">
@@ -182,7 +182,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2 border-primary/5">
+        <Card className="md:col-span-2 3xl:col-span-4 border-primary/5">
           <CardContent className="p-5">
             <Link to="/categories" className="flex items-center gap-2 mb-4 group">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -191,7 +191,7 @@ export default function Dashboard() {
               <span className="text-sm font-medium group-hover:text-primary transition-colors">Browse Categories</span>
               <ArrowRight className="h-3 w-3 ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
             </Link>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10">
               {MOCK_CATEGORIES.slice(0, 6).map((category) => (
                 <CategoryTile key={category.id} category={category} />
               ))}
@@ -216,7 +216,7 @@ export default function Dashboard() {
         </div>
 
         {recommended.length > 0 ? (
-          <StaggerFade className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StaggerFade className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5">
             {recommended.map((listing, i) => (
               <StaggerItem key={listing.id} index={i}>
                 <ListingCard listing={listing} />

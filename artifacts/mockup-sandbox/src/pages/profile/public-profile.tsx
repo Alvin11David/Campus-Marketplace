@@ -109,7 +109,7 @@ export default function PublicProfilePage() {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto px-4 py-8 space-y-8"
+      className="max-w-4xl mx-auto px-4 py-8 space-y-8 3xl:max-w-[1600px] 4xl:max-w-[1920px]"
     >
       <BackButton />
 
@@ -194,7 +194,7 @@ export default function PublicProfilePage() {
           </TabsList>
           {serviceListings.length > 0 && (
             <TabsContent value="services">
-              <StaggerFade className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              <StaggerFade className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
                 {serviceListings.map((listing, i) => (
                   <StaggerItem key={listing.id} index={i}>
                     <ListingCard listing={listing} />
@@ -205,7 +205,7 @@ export default function PublicProfilePage() {
           )}
           {productListings.length > 0 && (
             <TabsContent value="products">
-              <StaggerFade className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              <StaggerFade className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
                 {productListings.map((listing, i) => (
                   <StaggerItem key={listing.id} index={i}>
                     <ListingCard listing={listing} />

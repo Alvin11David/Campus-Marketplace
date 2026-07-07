@@ -77,7 +77,7 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12 4xl:max-w-4xl">
         <div className="mb-6 flex items-center gap-3">
           <BackButton className="-ml-1" />
           <div>
