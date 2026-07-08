@@ -16,6 +16,7 @@ interface AuthContextType {
   }) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
+  refreshUser: () => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -128,6 +129,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const res = await apiGet<Record<string, unknown>>("/auth/me");
+    const mapped = mapUser(res);
+    setUser(mapped);
+    localStorage.setItem("cm_user", JSON.stringify(mapped));
+    return mapped;
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         updateUser,
+        refreshUser,
       }}
     >
       {children}
