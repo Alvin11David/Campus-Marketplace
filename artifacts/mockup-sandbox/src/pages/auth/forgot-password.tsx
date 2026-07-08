@@ -10,8 +10,10 @@ import { BackButton } from "@/components/shared/back-button";
 import { GravityStarsBackground } from "@/components/backgrounds/gravity-stars-background";
 import { cn } from "@/lib/utils";
 
+import { apiPost } from "@/lib/api";
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CODE_LENGTH = 5;
+const CODE_LENGTH = 6;
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -40,32 +42,42 @@ export default function ForgotPassword() {
     }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setStep("code");
-    setResendCooldown(30);
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) { clearInterval(timer); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
+    try {
+      await apiPost("/auth/forgot-password", { email });
+      setStep("code");
+      setResendCooldown(30);
+      const timer = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(timer); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    setCode(Array(CODE_LENGTH).fill(""));
-    setResendCooldown(30);
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) { clearInterval(timer); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-    codeRefs.current[0]?.focus();
+    try {
+      await apiPost("/auth/forgot-password", { email });
+      setCode(Array(CODE_LENGTH).fill(""));
+      setResendCooldown(30);
+      const timer = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(timer); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+      codeRefs.current[0]?.focus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCodeChange = useCallback((index: number, value: string) => {
@@ -117,9 +129,9 @@ export default function ForgotPassword() {
     if (!codeFilled) return;
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
-    navigate("/reset-password/mock-token-123");
+    navigate("/reset-password", { state: { email, otp: code.join("") } });
   };
 
   const emailStep = (
@@ -141,7 +153,7 @@ export default function ForgotPassword() {
           </motion.div>
           <CardTitle className="text-xl">Forgot password?</CardTitle>
           <CardDescription>
-            Enter your email and we'll send you a 5-digit code to reset it.
+            Enter your email and we'll send you a 6-digit code to reset it.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -262,7 +274,7 @@ export default function ForgotPassword() {
             transition={{ delay: 0.25 }}
             className="text-sm text-muted-foreground text-center mb-6"
           >
-            We sent a 5-digit code to <strong className="text-foreground">{email}</strong>
+            We sent a 6-digit code to <strong className="text-foreground">{email}</strong>
           </motion.p>
 
           <AnimatePresence>
