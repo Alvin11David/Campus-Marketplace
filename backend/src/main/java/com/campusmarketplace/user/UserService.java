@@ -1,6 +1,7 @@
 package com.campusmarketplace.user;
 
 import com.campusmarketplace.common.ApiException;
+import com.campusmarketplace.email.EmailService;
 import com.campusmarketplace.location.CampusLocation;
 import com.campusmarketplace.location.CampusLocationRepository;
 import com.campusmarketplace.security.JwtTokenProvider;
@@ -22,16 +23,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
     private final Set<String> blacklistedTokens = new HashSet<>();
 
     public UserService(UserRepository userRepository, CampusLocationRepository campusLocationRepository,
                        PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
-                       AuthenticationManager authenticationManager) {
+                       AuthenticationManager authenticationManager, EmailService emailService) {
         this.userRepository = userRepository;
         this.campusLocationRepository = campusLocationRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -46,6 +49,8 @@ public class UserService {
         var user = new User(request.email(), passwordEncoder.encode(request.password()),
             request.fullName(), request.phone());
         user = userRepository.save(user);
+
+        emailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
