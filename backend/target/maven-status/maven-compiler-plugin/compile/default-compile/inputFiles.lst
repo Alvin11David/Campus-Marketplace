@@ -8,6 +8,7 @@ C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\com
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\GlobalExceptionHandler.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\PageResponse.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\config\DataSeeder.java
+C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\email\EmailService.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\listing\dto\CreateListingRequest.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\listing\dto\ListingResponse.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\listing\dto\StatusUpdateRequest.java

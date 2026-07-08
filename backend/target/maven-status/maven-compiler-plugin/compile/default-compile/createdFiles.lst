@@ -18,6 +18,7 @@ com\campusmarketplace\listing\dto\StatusUpdateRequest.class
 com\campusmarketplace\user\dto\AuthResponse.class
 com\campusmarketplace\CampusMarketplaceApplication.class
 com\campusmarketplace\category\CategoryController.class
+com\campusmarketplace\email\EmailService.class
 com\campusmarketplace\common\GlobalExceptionHandler.class
 com\campusmarketplace\messaging\MessageRepository.class
 com\campusmarketplace\listing\ListingView.class
