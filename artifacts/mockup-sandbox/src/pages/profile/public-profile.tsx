@@ -153,11 +153,7 @@ export default function PublicProfilePage() {
                   </span>
                 )}
                 <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" /> Joined{" "}
-                  {new Date(profileUser.created_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                  })}
+                  <Calendar className="h-3.5 w-3.5" /> Member
                 </span>
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
