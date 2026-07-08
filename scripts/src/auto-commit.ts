@@ -43,7 +43,10 @@ function formatSummary(files: string[]): string {
   return parts.join("; ");
 }
 
-function main() {
+const WATCH_INTERVAL_MS = parseInt(process.argv[process.argv.indexOf("--interval") + 1], 10) || 30_000;
+const isWatch = process.argv.includes("--watch") || process.argv.includes("-w");
+
+function runOnce(): boolean {
   console.log("🔍 Checking for changes...\n");
 
   const { staged, unstaged, untracked } = getStatus();
@@ -53,7 +56,7 @@ function main() {
 
   if (allChanged.length === 0) {
     console.log("✅ No changes to commit.");
-    return;
+    return false;
   }
 
   console.log(`📦 ${allChanged.length} file(s) changed:\n`);
@@ -62,7 +65,6 @@ function main() {
     console.log(`  ${tag}  ${f}`);
   }
 
-  // Stage everything
   console.log("\n📥 Staging all changes...");
   run("git add -A");
   console.log("   Done.");
@@ -76,7 +78,7 @@ function main() {
     console.log("   Done.");
   } catch {
     console.log("   Nothing to commit (already committed).");
-    return;
+    return false;
   }
 
   console.log("\n📤 Pushing to origin...");
@@ -88,6 +90,17 @@ function main() {
   }
 
   console.log("\n✅ All done.");
+  return true;
 }
 
-main();
+if (isWatch) {
+  console.log(`👀 Watch mode active (interval: ${WATCH_INTERVAL_MS / 1000}s). Press Ctrl+C to stop.\n`);
+  const tick = () => {
+    runOnce();
+    console.log(`\n⏳ Waiting ${WATCH_INTERVAL_MS / 1000}s before next check...\n`);
+    setTimeout(tick, WATCH_INTERVAL_MS);
+  };
+  tick();
+} else {
+  runOnce();
+}
