@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, BadgeCheck, Calendar, Flag, Package, Store, Star, MessageCircle } from "lucide-react";
@@ -15,7 +16,7 @@ import { ReportDialog } from "@/components/shared/report-dialog";
 import { ListingCard } from "@/components/shared/listing-card";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
 import { MOCK_LISTINGS, MOCK_REVIEWS } from "@/lib/mock-data";
-import { CAMPUS_LOCATIONS, MOCK_USER } from "@/lib/api";
+import { apiGet } from "@/lib/api";
 import type { User, Review } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -44,51 +45,60 @@ function formatDate(dateStr: string) {
 export default function PublicProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const profileUser: User = {
-    ...MOCK_USER,
-    id: Number(id) || 2,
-    full_name: Number(id) === 2 ? "Taban James" :
-               Number(id) === 3 ? "Sarah Nakato" :
-               Number(id) === 4 ? "Grace Achieng" :
-               Number(id) === 5 ? "Peter Okello" :
-               Number(id) === 6 ? "Mary Wanzala" :
-               Number(id) === 7 ? "John Kato" :
-               Number(id) === 8 ? "Faith Namugenyi" :
-               Number(id) === 9 ? "Dr. Sarah Mbabazi" : "Richard Seko Anundu",
-    email: `user${id}@students.vu.ac.ug`,
-    bio: Number(id) === 2 ? "Expert laptop repair technician with 2+ years of experience." :
-         Number(id) === 3 ? "Professional printing and binding services at affordable rates." :
-         Number(id) === 4 ? "Professional hair stylist specializing in braiding and weaves." :
-         Number(id) === 5 ? "Computer science student selling gently used textbooks." :
-         Number(id) === 6 ? "Campus entrepreneur offering phone accessories." :
-         Number(id) === 7 ? "Laundry service provider with fast turnaround." :
-         Number(id) === 8 ? "Event planner and decorator for all campus occasions." :
-         Number(id) === 9 ? "PhD graduate offering research and statistics tutoring." : "Campus Marketplace user.",
-    profile_photo_url: null,
-    campus_location_id: [2, 3, 4, 5, 6, 7, 8, 9].includes(Number(id)) ? 1 : 1,
-    is_provider: true,
-    is_seller: [5, 6].includes(Number(id)),
-    is_verified: true,
-    avg_rating: Number(id) === 2 ? 4.8 :
-                Number(id) === 3 ? 4.5 :
-                Number(id) === 4 ? 4.9 :
-                Number(id) === 5 ? 4.2 :
-                Number(id) === 6 ? 4.4 :
-                Number(id) === 7 ? 4.3 :
-                Number(id) === 8 ? 4.6 :
-                Number(id) === 9 ? 4.9 : 4.7,
-    rating_count: Number(id) === 2 ? 9 :
-                  Number(id) === 3 ? 8 :
-                  Number(id) === 4 ? 15 :
-                  Number(id) === 5 ? 6 :
-                  Number(id) === 6 ? 7 :
-                  Number(id) === 7 ? 11 :
-                  Number(id) === 8 ? 5 :
-                  Number(id) === 9 ? 20 : 12,
-  };
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    apiGet<Record<string, unknown>>(`/users/${id}`)
+      .then((data) => {
+        const mapped: User = {
+          id: data.id as number,
+          full_name: data.fullName as string,
+          email: "",
+          phone: "",
+          bio: (data.bio as string) ?? null,
+          profile_photo_url: (data.profilePhotoUrl as string) ?? null,
+          campus_location_id: (data.campusLocation as Record<string, unknown>)?.id as number ?? null,
+          campus_location_name: (data.campusLocation as Record<string, unknown>)?.name as string ?? null,
+          is_provider: data.isProvider as boolean,
+          is_seller: data.isSeller as boolean,
+          is_admin: false,
+          is_verified: data.isVerified as boolean,
+          is_active: true,
+          is_suspended: false,
+          avg_rating: (data.avgRating as number) ?? null,
+          rating_count: (data.ratingCount as number) ?? 0,
+          created_at: "",
+        };
+        setProfileUser(mapped);
+      })
+      .catch(() => setError("User not found"))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const campusName = getCampusName(profileUser.campus_location_id);
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        <Skeleton className="h-8 w-20" />
+        <Skeleton className="h-48 rounded-xl" />
+        <Skeleton className="h-32 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (error || !profileUser) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <BackButton />
+        <CartoonEmpty variant="package" title="User not found" description="This user does not exist or has been deactivated." />
+      </div>
+    );
+  }
+
+  const campusName = profileUser.campus_location_name;
   const initials = getInitials(profileUser.full_name);
 
   const userListings = MOCK_LISTINGS.filter(

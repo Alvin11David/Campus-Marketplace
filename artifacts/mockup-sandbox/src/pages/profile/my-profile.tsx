@@ -100,13 +100,21 @@ export default function MyProfilePage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    updateUser({
-      ...form,
-      is_provider: isProvider,
-      is_seller: isSeller,
-    });
-    setSaving(false);
+    try {
+      await apiPatch("/users/me", {
+        fullName: form.full_name,
+        bio: form.bio,
+        phone: form.phone,
+        campusLocationId: form.campus_location_id,
+      });
+      await apiPatch("/users/me/roles", { isProvider, isSeller });
+      await refreshUser();
+      toast.success("Profile updated");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!user) return null;
@@ -365,11 +373,21 @@ export default function MyProfilePage() {
                   disabled={!deactivatePassword.trim() || deactivating}
                   onClick={async () => {
                     setDeactivating(true);
-                    await new Promise((r) => setTimeout(r, 500));
-                    setDeactivating(false);
-                    setDeactivateDialogOpen(false);
-                    setDeactivatePassword("");
-                    toast.success("Account deactivated");
+                    try {
+                      await apiPost("/users/me/deactivate", {
+                        password: deactivatePassword,
+                        reason: "User requested",
+                      });
+                      await logout();
+                      navigate("/login", { replace: true });
+                      toast.success("Account deactivated");
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to deactivate");
+                    } finally {
+                      setDeactivating(false);
+                      setDeactivateDialogOpen(false);
+                      setDeactivatePassword("");
+                    }
                   }}
                 >
                   {deactivating ? "Deactivating..." : "Yes, Deactivate"}
