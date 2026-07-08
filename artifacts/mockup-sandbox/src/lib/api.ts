@@ -1,9 +1,40 @@
 const API_BASE = "http://localhost:8080/api/v1";
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = localStorage.getItem("cm_token");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Request failed" }));
+    throw new Error(err.detail || "Request failed");
+  }
+  return res.json();
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const headers: Record<string, string> = {};
+  const token = localStorage.getItem("cm_token");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}${path}`, { headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Request failed" }));
+    throw new Error(err.detail || "Request failed");
+  }
+  return res.json();
+}
+
+export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = localStorage.getItem("cm_token");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PATCH",
+    headers,
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -63,104 +94,77 @@ export interface Listing {
   id: number;
   title: string;
   slug: string;
-  listing_type: "service" | "product";
-  category: { id: number; name: string };
-  price: string;
-  currency: string;
   description: string;
-  campus_location: { id: number; name: string };
-  campus_location_id: number;
-  owner: ListingOwner;
-  owner_id: number;
-  primary_image_url: string | null;
-  images: ListingImage[];
-  stock_quantity: number | null;
-  status: "active" | "paused" | "draft" | "deleted";
-  avg_rating: number | null;
-  rating_count: number;
+  price: number;
+  price_unit: "flat" | "hourly" | "negotiable";
+  listing_type: "service" | "product";
+  status: "active" | "sold" | "closed";
+  condition: "new" | "like-new" | "good" | "fair" | "not-applicable";
+  location_details: string | null;
   view_count: number;
-  message_count: number;
-  recommendation_score?: number;
+  owner: ListingOwner;
+  images: ListingImage[];
+  category_id: number;
+  category_name: string;
+  campus_location_id: number;
+  campus_location_name: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface Conversation {
   id: number;
-  listing_id: number;
-  listing_title: string;
-  listing_image_url: string | null;
-  other_participant: {
+  other_user: {
     id: number;
     full_name: string;
     profile_photo_url: string | null;
   };
-  last_message_preview: string;
-  last_message_at: string;
+  last_message: {
+    content: string;
+    created_at: string;
+  } | null;
   unread_count: number;
-  created_at: string;
+  updated_at: string;
 }
 
 export interface Message {
   id: number;
-  conversation_id: number;
+  content: string;
   sender_id: number;
-  body: string;
+  created_at: string;
+}
+
+export interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
   is_read: boolean;
+  related_listing_id: number | null;
   created_at: string;
 }
 
 export interface Review {
   id: number;
-  listing_id: number;
+  rating: number;
+  comment: string;
   reviewer: {
     id: number;
     full_name: string;
     profile_photo_url: string | null;
   };
-  rating: number;
-  comment: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Notification {
-  id: number;
-  notif_type: string;
-  title: string;
-  body: string | null;
-  related_type: string | null;
-  related_id: number | null;
-  is_read: boolean;
   created_at: string;
 }
 
 export interface Report {
   id: number;
-  reporter_id: number;
-  target_type: "listing" | "review" | "user";
-  target_id: number;
   reason: string;
-  description: string | null;
-  status: "pending" | "resolved" | "dismissed";
+  description: string;
+  status: string;
+  reporter: { id: number; full_name: string };
+  target_user: { id: number; full_name: string } | null;
+  target_listing: { id: number; title: string } | null;
   created_at: string;
-}
-
-export interface AdminAnalytics {
-  total_users: number;
-  new_users_this_week: number;
-  total_active_listings: number;
-  listings_by_category: { category: string; count: number }[];
-  total_messages_sent: number;
-  total_reviews_submitted: number;
-  platform_avg_rating: number;
-}
-
-export interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
 }
 
 export const CAMPUS_LOCATIONS = [
