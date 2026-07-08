@@ -120,7 +120,7 @@ export default function Register() {
     if (password !== confirmPassword) { setError("Passwords do not match"); return; }
     setLoading(true);
     try {
-      await register({ full_name: fullName, email, phone, password });
+      await register({ fullName, email, phone, password, passwordConfirmation: confirmPassword });
       navigate("/onboarding", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
