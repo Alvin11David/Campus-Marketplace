@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -61,4 +62,9 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
 
     @Query("SELECT COUNT(l) FROM Listing l WHERE l.status = 'active'")
     long countActive();
+
+    @jakarta.transaction.Transactional
+    @Modifying
+    @Query("UPDATE Listing l SET l.viewCount = l.viewCount + 1 WHERE l.id = :id")
+    void incrementViewCount(@Param("id") Long id);
 }
