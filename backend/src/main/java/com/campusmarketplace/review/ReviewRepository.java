@@ -30,4 +30,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.reviewee.id = :userId AND r.isDeleted = false")
     long getRatingCountForUser(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.isDeleted = false")
+    long countActiveReviews();
+
+    @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.isDeleted = false")
+    double getPlatformAverageRating();
 }
