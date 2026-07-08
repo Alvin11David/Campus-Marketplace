@@ -31,9 +31,9 @@ const itemVariants = {
 };
 
 const benefits = [
-  { icon: GraduationCap, text: "Student-verified community" },
-  { icon: Star, text: "Trusted ratings & reviews" },
-  { icon: MessageSquare, text: "Built-in messaging" },
+  { icon: GraduationCap, text: "Student-verified community", desc: "Connect with real VU students" },
+  { icon: Star, text: "Trusted ratings & reviews", desc: "Know who you're dealing with" },
+  { icon: MessageSquare, text: "Built-in messaging", desc: "Chat without leaving the platform" },
 ];
 
 function getPasswordStrength(pw: string): { label: string; color: string; width: string } {
@@ -228,15 +228,16 @@ export default function Register() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto grid lg:grid-cols-5 gap-6 items-start">
+    <div className="w-full max-w-5xl mx-auto lg:grid lg:grid-cols-5 lg:gap-10 items-start">
+      {/* Sidebar - hidden on mobile */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        className="hidden lg:flex flex-col gap-6 pt-8 lg:col-span-2"
+        className="hidden lg:flex flex-col gap-6 lg:col-span-2 lg:sticky lg:top-8"
       >
-        <div className="space-y-3">
-          <h2 className="text-2xl font-bold tracking-tight">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold tracking-tight leading-tight">
             Join your<br />
             <span className="text-primary">campus community</span>
           </h2>
@@ -245,38 +246,44 @@ export default function Register() {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {benefits.map((b, i) => (
             <motion.div
               key={b.text}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 + i * 0.1 }}
-              className="flex items-start gap-3 group"
+              className="flex items-start gap-3"
             >
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-                <b.icon className="h-4 w-4" />
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <b.icon className="h-4.5 w-4.5" />
               </div>
-              <span className="text-sm text-muted-foreground">{b.text}</span>
+              <div>
+                <p className="text-sm font-medium text-foreground/90">{b.text}</p>
+                <p className="text-xs text-muted-foreground/70 mt-0.5">{b.desc}</p>
+              </div>
             </motion.div>
           ))}
         </div>
 
         <div className="mt-4 rounded-xl border border-primary/10 bg-gradient-to-br from-primary/[0.03] to-transparent p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            Victoria University students only
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+            <p className="text-xs text-muted-foreground/70">
+              Victoria University students only
+            </p>
           </div>
         </div>
       </motion.div>
 
+      {/* Card */}
       <motion.div
-        className="lg:col-span-3"
+        className="lg:col-span-3 mt-6 lg:mt-0"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
       >
-        <Card className="relative overflow-hidden border-primary/10 shadow-2xl shadow-primary/5 bg-card/90 backdrop-blur-xl">
+        <Card className="relative overflow-hidden border-primary/10 shadow-2xl shadow-primary/5 bg-card/95 backdrop-blur-xl">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-secondary/[0.02] pointer-events-none" />
           <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
