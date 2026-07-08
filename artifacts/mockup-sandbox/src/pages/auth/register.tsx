@@ -228,7 +228,7 @@ export default function Register() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto lg:grid lg:grid-cols-5 lg:gap-10 items-start">
+    <div className="w-full max-w-5xl mx-auto self-start lg:grid lg:grid-cols-5 lg:gap-10 items-start">
       {/* Sidebar - hidden on mobile */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
