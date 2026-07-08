@@ -20,7 +20,10 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "Request failed" }));
+    const text = await res.text();
+    let err: Record<string, unknown>;
+    try { err = JSON.parse(text); } catch { err = { detail: text || "Request failed" }; }
+    console.error("API error:", res.status, err);
     throw new Error(extractError(err));
   }
   return res.json();
