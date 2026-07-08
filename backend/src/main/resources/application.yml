@@ -18,12 +18,28 @@ spring:
     serialization:
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: alvin69david@gmail.com
+    password: vxal hjkz vcyo chun
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 app:
   jwt:
     secret: campus-marketplace-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
+  frontend:
+    url: http://localhost:3000
 
 server:
   port: 8080
