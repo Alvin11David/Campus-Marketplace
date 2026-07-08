@@ -38,8 +38,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/categories/**").permitAll()
                 .requestMatchers("/api/v1/listings/**").permitAll()
-                .requestMatchers("/api/v1/users/**/reviews").permitAll()
-                .requestMatchers("/api/v1/listings/**/reviews").permitAll()
+                .requestMatchers("/api/v1/users/*/reviews").permitAll()
+                .requestMatchers("/api/v1/listings/*/reviews").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
@@ -56,6 +56,10 @@ public class SecurityConfig {
             "http://localhost:3000",
             "http://192.168.137.1:3000",
             "http://192.168.137.1:*"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
