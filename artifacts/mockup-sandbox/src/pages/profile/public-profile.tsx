@@ -29,11 +29,6 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-function getCampusName(locationId: number | null) {
-  if (!locationId) return null;
-  return CAMPUS_LOCATIONS.find((l) => l.id === locationId)?.name || null;
-}
-
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
     year: "numeric",
