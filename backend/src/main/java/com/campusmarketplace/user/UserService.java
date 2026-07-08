@@ -6,6 +6,8 @@ import com.campusmarketplace.location.CampusLocation;
 import com.campusmarketplace.location.CampusLocationRepository;
 import com.campusmarketplace.security.JwtTokenProvider;
 import com.campusmarketplace.user.dto.*;
+import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,17 +26,21 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
     private final Set<String> blacklistedTokens = new HashSet<>();
 
     public UserService(UserRepository userRepository, CampusLocationRepository campusLocationRepository,
                        PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
-                       AuthenticationManager authenticationManager, EmailService emailService) {
+                       AuthenticationManager authenticationManager, EmailService emailService,
+                       PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.campusLocationRepository = campusLocationRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
         this.emailService = emailService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Transactional
@@ -56,6 +62,50 @@ public class UserService {
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
         return new AuthResponse(UserProfileResponse.from(user), accessToken, refreshToken);
+    }
+
+    @Transactional
+    public MessageResponse forgotPassword(ForgotPasswordRequest request) {
+        var userOpt = userRepository.findByEmail(request.email());
+
+        if (userOpt.isPresent()) {
+            var user = userOpt.get();
+            passwordResetTokenRepository.deleteByUserId(user.getId());
+
+            String otp = String.format("%06d", secureRandom.nextInt(1_000_000));
+            var token = new PasswordResetToken(user, otp, Instant.now().plusSeconds(900));
+            passwordResetTokenRepository.save(token);
+
+            emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+        }
+
+        return new MessageResponse("If an account with that email exists, a reset code has been sent.");
+    }
+
+    @Transactional
+    public MessageResponse resetPassword(ResetPasswordRequest request) {
+        if (!request.newPassword().equals(request.passwordConfirmation())) {
+            throw ApiException.badRequest("Passwords do not match");
+        }
+
+        var user = userRepository.findByEmail(request.email())
+            .orElseThrow(() -> ApiException.badRequest("Invalid or expired reset code"));
+
+        var token = passwordResetTokenRepository
+            .findByUserIdAndOtpAndUsedFalse(user.getId(), request.otp())
+            .orElseThrow(() -> ApiException.badRequest("Invalid or expired reset code"));
+
+        if (!token.isValid()) {
+            throw ApiException.badRequest("Reset code has expired. Please request a new one.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        token.setUsed(true);
+        passwordResetTokenRepository.save(token);
+
+        return new MessageResponse("Password has been reset successfully.");
     }
 
     public AuthResponse login(LoginRequest request) {

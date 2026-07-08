@@ -33,6 +33,16 @@ public class UserController {
         return ResponseEntity.ok(userService.login(request));
     }
 
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(userService.forgotPassword(request));
+    }
+
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(userService.resetPassword(request));
+    }
+
     @PostMapping("/auth/refresh")
     public ResponseEntity<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(userService.refresh(request));
