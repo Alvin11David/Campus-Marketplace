@@ -18,7 +18,7 @@ export function AuthLayout() {
         </Link>
       </header>
 
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8 overflow-y-auto min-h-0">
         <AnimatePresence mode="wait">
           <PageTransition key={location.pathname}>
             <Outlet />
