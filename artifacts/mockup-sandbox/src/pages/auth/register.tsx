@@ -341,7 +341,7 @@ export default function Register() {
 
                 {renderField("fullName", "Full Name", "text", "John Doe", "name")}
                 {renderField("email", "Email", "email", "you@students.vu.ac.ug", "email")}
-                {renderField("phone", "Phone Number", "tel", "+256 XXX XXX XXX", "tel")}
+                {renderField("phone", "Phone Number", "tel", "+256700000000 or 0700000000", "tel")}
                 {renderField("password", "Password", "password", "Create a strong password", "new-password")}
                 {renderField("confirmPassword", "Confirm Password", "password", "Re-enter your password", "new-password")}
 
