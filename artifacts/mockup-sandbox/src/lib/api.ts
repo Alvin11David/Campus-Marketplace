@@ -1,47 +1,41 @@
 const API_BASE = "http://localhost:8080/api/v1";
 
-export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+function extractError(body: Record<string, unknown>): string {
+  if (body.errors && typeof body.errors === "object") {
+    const fieldMsgs = Object.entries(body.errors as Record<string, string[]>)
+      .map(([field, msgs]) => `${field}: ${msgs.join(", ")}`)
+      .join("; ");
+    if (fieldMsgs) return `${body.detail ?? "Validation failed"} (${fieldMsgs})`;
+  }
+  return (body.detail as string) || "Request failed";
+}
+
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const token = localStorage.getItem("cm_token");
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
+    method,
     headers,
-    body: JSON.stringify(body),
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Request failed" }));
-    throw new Error(err.detail || "Request failed");
+    throw new Error(extractError(err));
   }
   return res.json();
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
-  const headers: Record<string, string> = {};
-  const token = localStorage.getItem("cm_token");
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}${path}`, { headers });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "Request failed" }));
-    throw new Error(err.detail || "Request failed");
-  }
-  return res.json();
+export function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return request<T>("POST", path, body);
 }
 
-export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = localStorage.getItem("cm_token");
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "PATCH",
-    headers,
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "Request failed" }));
-    throw new Error(err.detail || "Request failed");
-  }
-  return res.json();
+export function apiGet<T>(path: string): Promise<T> {
+  return request<T>("GET", path);
+}
+
+export function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  return request<T>("PATCH", path, body);
 }
 
 export interface User {
