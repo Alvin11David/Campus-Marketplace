@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MOCK_CATEGORIES } from "@/lib/mock-data";
 import type { Category } from "@/lib/api";
 import { useEffect, useState, useRef } from "react";
+import { GitHubStarsWheel } from "@/components/shared/github-stars-wheel";
 
 const categoryIconMap: Record<string, typeof Printer> = {
   Printer, Wrench, BookOpen, Scissors, Sparkles, Package,
@@ -74,19 +75,19 @@ function CategoryTeaserCard({ category, index }: { category: Category; index: nu
       transition={{ duration: 0.5, delay: index * 0.05 }}
       whileHover={{ y: -8, scale: 1.02 }}
     >
-      <Card className="group cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 border-primary/10 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <Card className="group cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-indigo-500/25 border-2 border-indigo-500/20 bg-white hover:border-indigo-500/40 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <Link to={`/categories/${category.slug}`} className="relative">
           <CardContent className="flex flex-col items-center gap-3 p-6">
             <motion.div 
-              className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 text-primary transition-all duration-500 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-secondary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/30"
+                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/10 to-amber-500/10 text-indigo-600 transition-all duration-500 group-hover:bg-gradient-to-br group-hover:from-indigo-600 group-hover:to-amber-500 group-hover:text-white group-hover:shadow-xl group-hover:shadow-indigo-500/30"
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
             >
               <IconComponent className="h-8 w-8" />
             </motion.div>
-            <span className="text-sm font-semibold text-center leading-tight group-hover:text-primary transition-colors">{category.name}</span>
-            <span className="text-xs text-muted-foreground text-center line-clamp-1 group-hover:text-muted-foreground/80 transition-colors">{category.description}</span>
+            <span className="text-sm font-semibold text-center leading-tight group-hover:text-indigo-600 transition-colors">{category.name}</span>
+            <span className="text-xs text-muted-foreground text-center line-clamp-1">{category.description}</span>
           </CardContent>
         </Link>
       </Card>
@@ -104,15 +105,15 @@ export default function Landing() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <motion.div style={{ y: y1 }} className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-full blur-[150px]" />
-        <motion.div style={{ y: y2 }} className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] bg-gradient-to-br from-secondary/10 via-secondary/5 to-transparent rounded-full blur-[120px]" />
+          <motion.div style={{ y: y1 }} className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-transparent rounded-full blur-[150px]" />
+        <motion.div style={{ y: y2 }} className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent rounded-full blur-[120px]" />
         <motion.div 
           animate={{ 
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
           }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[20%] left-[30%] w-[30%] h-[30%] bg-gradient-to-br from-accent/5 to-transparent rounded-full blur-[100px]" 
+          className="absolute top-[20%] left-[30%] w-[30%] h-[30%] bg-gradient-to-br from-orange-500/5 to-transparent rounded-full blur-[100px]" 
         />
       </div>
 
@@ -120,8 +121,8 @@ export default function Landing() {
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {[...Array(20)].map((_, i) => (
           <FloatingElement key={i} delay={i * 0.5} duration={15 + i * 2}>
-            <div 
-              className="absolute w-2 h-2 rounded-full bg-primary/20"
+              <div 
+                className={`absolute w-2 h-2 rounded-full ${i % 3 === 0 ? 'bg-indigo-500/20' : i % 3 === 1 ? 'bg-amber-500/20' : 'bg-orange-500/20'}`}
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -145,13 +146,13 @@ export default function Landing() {
           >
             <Link to="/" className="flex items-center gap-2">
               <motion.div 
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/30"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
                 <span className="text-sm font-bold text-primary-foreground">CM</span>
               </motion.div>
-              <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">CampusMarket</span>
+              <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent">CampusMarket</span>
             </Link>
           </motion.div>
           <div className="flex items-center gap-2">
@@ -171,7 +172,7 @@ export default function Landing() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 size="sm" 
-                className="relative overflow-hidden bg-gradient-to-r from-primary to-secondary shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all" 
+                className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all" 
                 asChild
               >
                 <Link to="/register">
@@ -180,7 +181,7 @@ export default function Landing() {
                     <Zap className="h-3 w-3" />
                   </span>
                   <motion.div 
-                    className="absolute inset-0 bg-gradient-to-r from-secondary to-primary"
+                    className="absolute inset-0 bg-gradient-to-r from-amber-500 to-indigo-600"
                     initial={{ x: "100%" }}
                     whileHover={{ x: 0 }}
                     transition={{ duration: 0.3 }}
@@ -194,7 +195,7 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-secondary/8" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-background to-amber-500/8" />
         <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-16 md:px-6 md:pb-28 md:pt-24 lg:pb-36 lg:pt-32 xl:max-w-none xl:px-10 2xl:px-12">
           <motion.div
             initial={{ opacity: 0, y: 60, scale: 0.95 }}
@@ -206,7 +207,7 @@ export default function Landing() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-secondary/10 px-6 py-2 text-sm text-primary backdrop-blur-sm shadow-lg shadow-primary/10"
+              className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-gradient-to-r from-indigo-500/20 to-amber-500/20 px-6 py-2 text-sm text-indigo-600 backdrop-blur-sm shadow-lg shadow-indigo-500/20"
             >
               <motion.div
                 animate={{ rotate: 360 }}
@@ -222,8 +223,8 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <span className="bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent animate-gradient bg-300% bg-gradient-to-r">Your Campus</span>{" "}
-              <span className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">Marketplace</span>
+              <span className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-amber-400 bg-clip-text text-transparent animate-gradient">Your Campus</span>{" "}
+              <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Marketplace</span>
             </motion.h1>
             <motion.p 
               className="mt-6 text-lg text-muted-foreground sm:text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed"
@@ -235,26 +236,35 @@ export default function Landing() {
             </motion.p>
 
             <motion.div 
-              className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground"
+              className="mt-8 flex flex-wrap items-center justify-center gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              {[
-                { icon: Users, label: "500+ Students", color: "text-primary" },
-                { icon: ShoppingBag, label: "50+ Listings", color: "text-secondary" },
-                { icon: Star, label: "4.8 Avg Rating", color: "text-accent" },
-              ].map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 backdrop-blur-sm border border-primary/10"
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
-                  <span className="font-medium">{stat.label}</span>
-                </motion.div>
-              ))}
+              <motion.div
+                className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/25 shadow-sm shadow-primary/5"
+                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Users className="h-5 w-5 text-primary" />
+                <span className="text-sm font-semibold text-primary">500+ Students</span>
+              </motion.div>
+              <motion.div
+                className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-amber-500/10 backdrop-blur-sm border border-amber-500/25 shadow-sm shadow-amber-500/5"
+                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <ShoppingBag className="h-5 w-5 text-amber-500" />
+                <span className="text-sm font-semibold text-amber-600">50+ Listings</span>
+              </motion.div>
+              <motion.div
+                className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-orange-500/10 backdrop-blur-sm border border-orange-500/25 shadow-sm shadow-orange-500/5"
+                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Star className="h-5 w-5 text-orange-500" />
+                <span className="text-sm font-semibold text-orange-600">4.8 Avg Rating</span>
+              </motion.div>
             </motion.div>
 
             <motion.div 
@@ -266,7 +276,7 @@ export default function Landing() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   size="lg" 
-                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-secondary shadow-2xl shadow-primary/30 hover:shadow-3xl hover:shadow-primary/40 transition-all text-lg px-8 py-6 relative overflow-hidden group"
+                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all relative overflow-hidden group"
                   asChild
                 >
                   <Link to="/register">
@@ -275,7 +285,7 @@ export default function Landing() {
                       <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <motion.div 
-                      className="absolute inset-0 bg-gradient-to-r from-secondary to-primary"
+                    className="absolute inset-0 bg-gradient-to-r from-amber-500 to-indigo-600"
                       initial={{ x: "-100%" }}
                       whileHover={{ x: 0 }}
                       transition={{ duration: 0.4 }}
@@ -287,7 +297,7 @@ export default function Landing() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="w-full sm:w-auto gap-2 text-lg px-8 py-6 border-2 border-primary/20 hover:border-primary/40 transition-all bg-background/50 backdrop-blur-sm"
+                  className="w-full sm:w-auto gap-2 border-2 border-indigo-500/30 hover:border-indigo-500/50 transition-all bg-indigo-500/5"
                   asChild
                 >
                   <Link to="/login">
@@ -313,11 +323,11 @@ export default function Landing() {
               ].map((feature, i) => (
                 <motion.div
                   key={feature.label}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-xs font-medium text-primary/70"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-600"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.8 + i * 0.1 }}
-                  whileHover={{ scale: 1.1, backgroundColor: "rgba(30, 58, 138, 0.1)" }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(79, 70, 229, 0.2)" }}
                 >
                   <feature.icon className="h-3 w-3" />
                   {feature.label}
@@ -329,56 +339,84 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="border-t border-primary/5 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24 xl:max-w-none xl:px-10 2xl:px-12">
+      <section className="border-t border-amber-200/60 bg-amber-50/70">
+        <div className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28 xl:max-w-none xl:px-10 2xl:px-12">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mb-16 text-center"
           >
-            <h2 className="text-2xl font-bold md:text-3xl">How It Works</h2>
-            <p className="mt-2 text-muted-foreground">Three simple steps to get what you need on campus</p>
+            <motion.h2 
+              className="text-4xl font-bold md:text-5xl bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              How It Works
+            </motion.h2>
+            <motion.p 
+              className="mt-4 text-lg text-muted-foreground"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              Three simple steps to get what you need on campus
+            </motion.p>
           </motion.div>
 
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 4xl:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 4xl:grid-cols-3">
             {[
               {
                 step: "01",
                 icon: Search,
                 title: "Browse Listings",
                 description: "Explore services and products offered by fellow students in your campus community.",
+                gradient: "from-indigo-500/30 to-indigo-500/10",
               },
               {
                 step: "02",
                 icon: MessageSquare,
                 title: "Message Providers",
                 description: "Chat directly with listing owners to ask questions and arrange details.",
+                gradient: "from-amber-500/30 to-amber-500/10",
               },
               {
                 step: "03",
                 icon: Handshake,
                 title: "Meet & Transact",
                 description: "Agree on a time and place to meet on campus and complete the transaction.",
+                gradient: "from-emerald-500/30 to-emerald-500/10",
               },
             ].map((item, i) => {
               const Icon = item.icon;
               return (
                 <motion.div
                   key={item.step}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.15 }}
+                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: i * 0.2 }}
+                  whileHover={{ y: -10, scale: 1.02 }}
                 >
-                  <Card className="h-full text-center border-primary/5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-                    <CardContent className="flex flex-col items-center gap-4 p-8">
-                      <span className="text-sm font-bold text-muted-foreground/40">{item.step}</span>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10">
-                        <Icon className="h-7 w-7 text-primary" />
-                      </div>
-                      <h3 className="text-lg font-semibold">{item.title}</h3>
+                  <Card className="h-full text-center border-2 border-amber-500/20 bg-white transition-all duration-500 hover:shadow-xl hover:shadow-amber-500/25 hover:border-amber-500/40 overflow-hidden relative group">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <CardContent className="relative flex flex-col items-center gap-6 p-8">
+                      <motion.div 
+                        className="relative"
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-amber-500/20 rounded-full blur-xl" />
+                        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-amber-500/20 border border-indigo-500/30">
+                          <Icon className="h-10 w-10 text-indigo-600" />
+                        </div>
+                      </motion.div>
+              <span className="text-2xl font-bold text-muted-foreground/30">{item.step}</span>
+              <h3 className="text-xl font-semibold group-hover:text-indigo-600 transition-colors">{item.title}</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
                     </CardContent>
                   </Card>
@@ -390,21 +428,38 @@ export default function Landing() {
       </section>
 
       {/* Categories Preview */}
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24 xl:max-w-none xl:px-10 2xl:px-12">
+      <section className="border-t border-indigo-200/60 bg-indigo-50/70">
+        <div className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28 xl:max-w-none xl:px-10 2xl:px-12">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-10 text-center"
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center"
         >
-          <h2 className="text-2xl font-bold md:text-3xl">Browse by Category</h2>
-          <p className="mt-2 text-muted-foreground">Find exactly what you need from students around campus</p>
+          <motion.h2 
+              className="text-4xl font-bold md:text-5xl bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              Browse by Category
+          </motion.h2>
+          <motion.p 
+            className="mt-4 text-lg text-muted-foreground"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            Find exactly what you need from students around campus
+          </motion.p>
         </motion.div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10">
-          {MOCK_CATEGORIES.map((category) => (
-            <CategoryTeaserCard key={category.id} category={category} />
+          {MOCK_CATEGORIES.map((category, index) => (
+            <CategoryTeaserCard key={category.id} category={category} index={index} />
           ))}
         </div>
 
@@ -412,39 +467,115 @@ export default function Landing() {
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-10 text-center"
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-12 text-center"
         >
-          <Button variant="outline" size="lg" className="active:scale-95 transition-transform" asChild>
-            <Link to="/categories">
-              View All Categories
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-8 py-6 text-lg border-2 border-indigo-500/30 hover:border-indigo-600/50 transition-all bg-white hover:bg-indigo-500/5 group relative overflow-hidden"
+                  asChild
+            >
+              <Link to="/categories">
+                <span className="relative z-10 flex items-center gap-2">
+                  View All Categories
+                  <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-amber-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </Link>
+            </Button>
+          </motion.div>
         </motion.div>
+        </div>
       </section>
 
       {/* Stats Section */}
-      <section className="border-t border-primary/5 bg-gradient-to-br from-primary/5 to-secondary/5">
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24 xl:max-w-none xl:px-10 2xl:px-12">
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 4xl:grid-cols-3">
+      <section className="border-t border-amber-200/60 bg-amber-50/70 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/4 left-1/4 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" 
+          />
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.3, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl" 
+          />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28 xl:max-w-none xl:px-10 2xl:px-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mb-16 text-center"
+          >
+            <motion.h2 
+              className="text-4xl font-bold md:text-5xl bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              Our Impact
+            </motion.h2>
+            <motion.p 
+              className="mt-4 text-lg text-muted-foreground"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              Building a thriving campus community
+            </motion.p>
+          </motion.div>
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 4xl:grid-cols-3">
             {[
-              { value: "500+", label: "Active Students" },
-              { value: "50+", label: "Listings" },
-              { value: "4.8", label: "Average Rating" },
+              { value: 500, label: "Active Students", icon: Users, color: "from-indigo-600 to-indigo-400" },
+              { value: 50, label: "Listings", icon: ShoppingBag, color: "from-amber-500 to-amber-400" },
+              { value: 4.8, label: "Average Rating", icon: Star, color: "from-emerald-500 to-emerald-400" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.2 }}
+                whileHover={{ y: -5, scale: 1.02 }}
                 className="text-center"
               >
-                <div className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  {stat.value}
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+                <Card className="border-2 border-indigo-500/20 bg-white hover:shadow-xl hover:shadow-indigo-500/25 transition-all duration-500 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <CardContent className="relative p-8">
+                    <motion.div 
+                      className="flex justify-center mb-4"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-amber-500/20 border border-indigo-500/30">
+                        <stat.icon className="h-8 w-8 text-indigo-600" />
+                      </div>
+                    </motion.div>
+                    <div className={`text-5xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
+                      {stat.value % 1 !== 0 ? stat.value : <AnimatedCounter end={stat.value} />}
+                      {stat.value % 1 !== 0 ? "" : "+"}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
@@ -452,21 +583,54 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-primary/5">
-        <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 xl:max-w-none xl:px-10 2xl:px-12">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary shadow-lg shadow-primary/25">
+      <motion.footer 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="border-t border-indigo-200/60 bg-indigo-50/50"
+      >
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 xl:max-w-none xl:px-10 2xl:px-12">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400 }}
+              className="flex items-center gap-2"
+            >
+              <motion.div 
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
                 <span className="text-[10px] font-bold text-primary-foreground">CM</span>
-              </div>
-              <span className="text-sm font-semibold">CampusMarket</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
+              </motion.div>
+              <span className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent">CampusMarket</span>
+            </motion.div>
+            <motion.p 
+              className="text-xs text-muted-foreground"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
               &copy; 2026 Campus Marketplace. All rights reserved.
-            </p>
+            </motion.p>
+            <div className="flex items-center gap-4">
+              <GitHubStarsWheel inView inViewOnce={false} inViewMargin="-100px" className="text-lg" />
+              {[Shield, Heart, Globe].map((Icon, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="p-2 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors"
+                >
+                  <Icon className="h-4 w-4 text-indigo-500/80" />
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export function AppLayout() {
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/5 rounded-full blur-3xl" />
       </div>
       <Navbar />
-      <main className="relative mx-auto max-w-7xl px-4 py-6 md:px-6 lg:px-8 xl:max-w-none xl:px-10 2xl:px-12 3xl:px-16 4xl:px-20">
+      <main className="relative">
         <AnimatePresence mode="wait">
           <PageTransition key={location.pathname}>
             <Outlet />
