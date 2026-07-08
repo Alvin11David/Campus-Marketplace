@@ -20,7 +20,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { StarRating } from "@/components/shared/star-rating";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
 import { useAuth } from "@/contexts/auth-context";
-import { CAMPUS_LOCATIONS } from "@/lib/api";
+import { CAMPUS_LOCATIONS, apiPatch, apiPost } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 function ProfileSkeleton() {
@@ -36,7 +36,7 @@ function ProfileSkeleton() {
 }
 
 export default function MyProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({

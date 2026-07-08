@@ -8,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
-import { CAMPUS_LOCATIONS } from "@/lib/api";
+import { CAMPUS_LOCATIONS, apiPatch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Location", "Roles"];
 
 export default function Onboarding() {
-  const { user, updateUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [campusLocationId, setCampusLocationId] = useState<string>(
@@ -31,16 +31,16 @@ export default function Onboarding() {
       return;
     }
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 300));
-    updateUser({
-      campus_location_id: campusLocationId ? Number(campusLocationId) : null,
-      campus_location_name: campusLocationId
-        ? CAMPUS_LOCATIONS.find((l) => l.id === Number(campusLocationId))?.name ?? null
-        : null,
-      is_provider: isProvider,
-      is_seller: isSeller,
-    });
-    navigate("/dashboard", { replace: true });
+    try {
+      await apiPatch("/users/me", { campusLocationId: Number(campusLocationId) });
+      await apiPatch("/users/me/roles", { isProvider, isSeller });
+      await refreshUser();
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      console.error("Onboarding failed:", err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSkip = () => {
