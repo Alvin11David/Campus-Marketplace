@@ -64,6 +64,16 @@ public class Review {
         updatedAt = Instant.now();
     }
 
+    public Review() {}
+
+    public Review(Listing listing, User reviewer, User reviewee, int rating, String comment) {
+        this.listing = listing;
+        this.reviewer = reviewer;
+        this.reviewee = reviewee;
+        this.rating = rating;
+        this.comment = comment;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Listing getListing() { return listing; }
