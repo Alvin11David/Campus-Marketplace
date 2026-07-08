@@ -15,6 +15,8 @@ public record UserProfileResponse(
     boolean isSeller,
     boolean isAdmin,
     boolean isVerified,
+    boolean isActive,
+    boolean isSuspended,
     BigDecimal avgRating,
     int ratingCount,
     String joinDate
@@ -34,6 +36,8 @@ public record UserProfileResponse(
             user.isSeller(),
             user.isAdmin(),
             user.isVerified(),
+            user.isActive(),
+            user.isSuspended(),
             user.getAvgRating(),
             user.getRatingCount(),
             user.getCreatedAt() != null ? user.getCreatedAt().toString() : null

@@ -12,6 +12,8 @@ public record PublicProfileResponse(
     boolean isProvider,
     boolean isSeller,
     boolean isVerified,
+    boolean isActive,
+    boolean isSuspended,
     BigDecimal avgRating,
     int ratingCount
 ) {
@@ -27,6 +29,8 @@ public record PublicProfileResponse(
             user.isProvider(),
             user.isSeller(),
             user.isVerified(),
+            user.isActive(),
+            user.isSuspended(),
             user.getAvgRating(),
             user.getRatingCount()
         );

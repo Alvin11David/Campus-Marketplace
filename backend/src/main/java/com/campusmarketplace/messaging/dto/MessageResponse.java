@@ -1,12 +1,13 @@
 package com.campusmarketplace.messaging.dto;
 
 import com.campusmarketplace.messaging.Message;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 
 public record MessageResponse(
     Long id,
     Long senderId,
-    String body,
+    @JsonProperty("content") String body,
     boolean isRead,
     Instant createdAt
 ) {
