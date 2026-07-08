@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Link, useParams, Navigate } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { KeyRound, Eye, EyeOff, CheckCircle2, Loader2, Lock, Check, X } from "lucide-react";
+import { KeyRound, Eye, EyeOff, CheckCircle2, Loader2, Lock, Check, X, ArrowRight } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { apiPost } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 function getStrength(password: string): { score: number; label: string; color: string; bg: string } {
@@ -24,8 +25,15 @@ function getStrength(password: string): { score: number; label: string; color: s
   return { score, label: "Very Strong", color: "bg-emerald-600", bg: "bg-emerald-600/10" };
 }
 
+interface LocationState {
+  email?: string;
+  otp?: string;
+}
+
 export default function ResetPassword() {
-  const { token } = useParams<{ token: string }>();
+  const location = useLocation();
+  const state = location.state as LocationState | null;
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -35,8 +43,8 @@ export default function ResetPassword() {
   const [touchedPassword, setTouchedPassword] = useState(false);
   const [touchedConfirm, setTouchedConfirm] = useState(false);
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
+  if (!state?.email || !state?.otp) {
+    return <Navigate to="/forgot-password" replace />;
   }
 
   const strength = getStrength(password);
@@ -67,9 +75,19 @@ export default function ResetPassword() {
     }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSuccess(true);
+    try {
+      await apiPost("/auth/reset-password", {
+        email: state.email,
+        otp: state.otp,
+        newPassword: password,
+        passwordConfirmation: confirmPassword,
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (success) {
@@ -113,7 +131,7 @@ export default function ResetPassword() {
               transition={{ delay: 0.4 }}
             >
               <Button asChild className="w-full">
-                <Link to="/login">Log In</Link>
+                <Link to="/login">Log In <ArrowRight className="ml-1 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </CardContent>
@@ -190,20 +208,12 @@ export default function ResetPassword() {
                   </button>
                   <AnimatePresence>
                     {passwordValid && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                      >
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
                         <Check className="h-4 w-4 text-emerald-500" />
                       </motion.div>
                     )}
                     {passwordInvalid && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                      >
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
                         <X className="h-4 w-4 text-destructive" />
                       </motion.div>
                     )}
@@ -211,7 +221,6 @@ export default function ResetPassword() {
                 </div>
               </div>
 
-              {/* Strength bar */}
               {password.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: -4 }}
@@ -257,20 +266,12 @@ export default function ResetPassword() {
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                   <AnimatePresence>
                     {passwordsMatch && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                      >
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
                         <Check className="h-4 w-4 text-emerald-500" />
                       </motion.div>
                     )}
                     {passwordsMismatch && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                      >
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
                         <X className="h-4 w-4 text-destructive" />
                       </motion.div>
                     )}
@@ -284,10 +285,7 @@ export default function ResetPassword() {
 
             <Button type="submit" className="w-full h-11" disabled={loading}>
               {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Resetting...
-                </>
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Resetting...</>
               ) : (
                 "Reset Password"
               )}
