@@ -123,7 +123,7 @@ export default function Register() {
       await register({
         fullName: fullName.trim(),
         email: email.trim(),
-        phone: phone.trim(),
+        phone: phone.replace(/\s+/g, ""),
         password,
         passwordConfirmation: confirmPassword,
       });
