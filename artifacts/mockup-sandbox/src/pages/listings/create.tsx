@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ImagePlus, X, Save, Send } from "lucide-react";
@@ -11,10 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_CATEGORIES } from "@/lib/mock-data";
-import { CAMPUS_LOCATIONS } from "@/lib/api";
+import { apiGet, apiPost, mapCategory } from "@/lib/api";
 import type { Category } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -38,11 +36,18 @@ export default function CreateListingPage() {
   const [categoryId, setCategoryId] = useState("");
   const [campusLocationId, setCampusLocationId] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [publishing, setPublishing] = useState(false);
 
-  const filteredCategories: Category[] = MOCK_CATEGORIES.filter((c) => {
+  useEffect(() => {
+    apiGet<any[]>("/categories")
+      .then((data) => setCategories((data ?? []).map(mapCategory)))
+      .catch(() => {});
+  }, []);
+
+  const filteredCategories: Category[] = categories.filter((c) => {
     if (listingType === "service") return c.listing_type_hint === "service" || c.listing_type_hint === "both";
     return c.listing_type_hint === "product" || c.listing_type_hint === "both";
   });
@@ -61,23 +66,28 @@ export default function CreateListingPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePublish = async () => {
+  const createListing = async (status?: string) => {
     if (!validate()) return;
     setPublishing(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setPublishing(false);
-    const mockId = Math.max(...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) + 1;
-    toast.success("Listing published", { description: "Your listing is now live." });
-    navigate(`/listings/${mockId}`);
-  };
-
-  const handleSaveDraft = async () => {
-    setPublishing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setPublishing(false);
-    const mockId = Math.max(...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) + 1;
-    toast.success("Draft saved");
-    navigate(`/listings/${mockId}`);
+    try {
+      const data = await apiPost<any>("/listings", {
+        title,
+        description,
+        listingType: listingType,
+        categoryId: Number(categoryId),
+        price: Number(price),
+        currency: "UGX",
+        stockQuantity: listingType === "product" ? Number(stockQuantity) : null,
+        campusLocationId: Number(campusLocationId),
+        imageUrls: images.length > 0 ? images : undefined,
+      });
+      toast.success("Listing published", { description: "Your listing is now live." });
+      navigate(`/listings/${data.id}`);
+    } catch {
+      toast.error("Failed to publish listing");
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const handleImageSelect = () => {
