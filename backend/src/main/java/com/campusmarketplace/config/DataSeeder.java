@@ -140,11 +140,11 @@ public class DataSeeder implements CommandLineRunner {
             new BigDecimal("45000"), mainCampus, "sold"));
         listingImageRepository.save(new ListingImage(listing6, "https://images.unsplash.com/photo-1587145820266-a5951ee6f620?w=600", 0));
 
-        reviewRepository.save(new Review(listing1, buyer, provider, 5, "Excellent tutor! Explained complex concepts clearly."));
-        reviewRepository.save(new Review(listing2, buyer, provider, 4, "Fixed my laptop screen quickly. Good service."));
-        reviewRepository.save(new Review(listing4, buyer, seller, 4, "Books are in good condition as described."));
-        reviewRepository.save(new Review(listing1, seller, provider, 5, "Very patient and knowledgeable. Highly recommend."));
-        reviewRepository.save(new Review(listing5, buyer, provider, 3, "Decent haircut but the waiting time was long."));
+        reviewRepository.save(createReview(listing1, buyer, provider, 5, "Excellent tutor! Explained complex concepts clearly."));
+        reviewRepository.save(createReview(listing2, buyer, provider, 4, "Fixed my laptop screen quickly. Good service."));
+        reviewRepository.save(createReview(listing4, buyer, seller, 4, "Books are in good condition as described."));
+        reviewRepository.save(createReview(listing1, seller, provider, 5, "Very patient and knowledgeable. Highly recommend."));
+        reviewRepository.save(createReview(listing5, buyer, provider, 3, "Decent haircut but the waiting time was long."));
 
         // TODO: In production, listing avgRating/ratingCount would be updated via a trigger or event.
         //       For seed data we update them directly to avoid requiring dedicated update methods.
@@ -163,9 +163,12 @@ public class DataSeeder implements CommandLineRunner {
         listingRepository.saveAll(List.of(listing1, listing2, listing4, listing5));
         userRepository.saveAll(List.of(provider, seller));
 
-        var conversation = conversationRepository.save(new Conversation(listing1, buyer, provider));
+        var conversation = new Conversation();
+        conversation.setListing(listing1);
+        conversation.setInitiator(buyer);
+        conversation.setRecipient(provider);
         conversation.setLastMessageAt(java.time.Instant.now());
-        conversationRepository.save(conversation);
+        conversation = conversationRepository.save(conversation);
 
         var msg1 = messageRepository.save(new Message(conversation, buyer, "Hi, I'm interested in math tutoring for this semester."));
         msg1.setRead(true);
@@ -210,6 +213,16 @@ public class DataSeeder implements CommandLineRunner {
         user.setActive(isActive);
         user.setSuspended(isSuspended);
         return user;
+    }
+
+    private Review createReview(Listing listing, User reviewer, User reviewee, int rating, String comment) {
+        var review = new Review();
+        review.setListing(listing);
+        review.setReviewer(reviewer);
+        review.setReviewee(reviewee);
+        review.setRating(rating);
+        review.setComment(comment);
+        return review;
     }
 
     private Listing createListing(User owner, Category category, String listingType,
