@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Pencil, Trash2, X, Check, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import {
   Select, SelectTrigger, SelectContent, SelectItem, SelectValue,
 } from "@/components/ui/select";
-import { MOCK_CATEGORIES } from "@/lib/mock-data";
+import { apiGet, mapCategory } from "@/lib/api";
 import type { Category } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
