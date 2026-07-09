@@ -42,21 +42,65 @@ export default function ListingDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const listing = MOCK_LISTINGS.find((l) => l.id === Number(id));
+  const [listing, setListing] = useState<any>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [relatedListings, setRelatedListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS.filter((r) => r.listing_id === Number(id)));
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [editRating, setEditRating] = useState(5);
   const [editComment, setEditComment] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Review | null>(null);
 
-  if (!listing) {
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setLoading(true);
+    setNotFound(false);
+
+    Promise.all([
+      apiGet<any>("/listings/" + id).then((data) => {
+        if (!cancelled) setListing(mapListing(data));
+      }),
+      apiGet<any>("/listings/" + id + "/reviews?page=0&pageSize=50").then((data) => {
+        if (!cancelled) setReviews((data.content ?? []).map(mapReview));
+      }),
+    ])
+      .catch(() => { if (!cancelled) setNotFound(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [id]);
+
+  useEffect(() => {
+    if (!listing) return;
+    apiGet<any>("/listings?categoryId=" + listing.category_id + "&page=0&size=3")
+      .then((data) => {
+        const list = (data.results ?? []).map(mapListing).filter((l: any) => l.id !== listing.id);
+        setRelatedListings(list);
+      })
+      .catch(() => {});
+  }, [listing]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        <Skeleton className="h-5 w-24" />
+        <Skeleton className="aspect-[16/9] w-full rounded-xl" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    );
+  }
+
+  if (notFound || !listing) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-2">Listing Not Found</h1>
@@ -66,41 +110,27 @@ export default function ListingDetailPage() {
     );
   }
 
-  const isOwner = user?.id === listing.owner_id;
-  const listingReviews: Review[] = reviews;
+  const isOwner = user?.id === listing.owner.id;
   const currentUserId = user?.id;
 
   const allImages = [
     ...(listing.primary_image_url ? [listing.primary_image_url] : []),
-    ...listing.images.map((img) => img.image_url),
+    ...listing.images.map((img: any) => img.image_url),
   ];
-
-  const relatedListings = MOCK_LISTINGS.filter(
-    (l) => l.id !== listing.id && l.status === "active" && l.category.id === listing.category.id
-  ).slice(0, 3);
 
   const handleSubmitReview = async () => {
     setSubmittingReview(true);
-    await new Promise((r) => setTimeout(r, 500));
-    const newReview: Review = {
-      id: Date.now(),
-      listing_id: listing.id,
-      reviewer: {
-        id: user?.id || 0,
-        full_name: user?.full_name || "You",
-        profile_photo_url: null,
-      },
-      rating: reviewRating,
-      comment: reviewComment || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    setReviews((prev) => [newReview, ...prev]);
+    try {
+      const created = await apiPost<any>("/reviews", { listingId: Number(id), rating: reviewRating, comment: reviewComment || null });
+      setReviews((prev) => [mapReview(created), ...prev]);
+      toast.success("Review submitted");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
     setSubmittingReview(false);
     setReviewDialogOpen(false);
     setReviewComment("");
     setReviewRating(5);
-    toast.success("Review submitted", { description: "Your review has been posted." });
   };
 
   const handleEditReview = (review: Review) => {
@@ -113,36 +143,37 @@ export default function ListingDetailPage() {
   const handleSaveEditReview = async () => {
     if (!editingReview) return;
     setSubmittingReview(true);
-    await new Promise((r) => setTimeout(r, 400));
-    setReviews((prev) =>
-      prev.map((r) =>
-        r.id === editingReview.id
-          ? { ...r, rating: editRating, comment: editComment || null, updated_at: new Date().toISOString() }
-          : r
-      )
-    );
+    try {
+      const updated = await apiPatch<any>("/reviews/" + editingReview.id, { rating: editRating, comment: editComment || null });
+      setReviews((prev) => prev.map((r) => (r.id === editingReview.id ? mapReview(updated) : r)));
+      toast.success("Review updated");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
     setSubmittingReview(false);
     setEditDialogOpen(false);
     setEditingReview(null);
-    toast.success("Review updated");
   };
 
   const handleDeleteReview = async () => {
     if (!deleteTarget) return;
-    await new Promise((r) => setTimeout(r, 300));
-    setReviews((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+    try {
+      await apiDelete("/reviews/" + deleteTarget.id);
+      setReviews((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+      toast.success("Review deleted");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
     setDeleteTarget(null);
-    toast.success("Review deleted");
   };
 
-  const handleMessage = () => {
-    const existing = MOCK_CONVERSATIONS.find(
-      (c) => c.listing_id === listing.id && c.other_participant.id === listing.owner_id
-    );
-    if (existing) {
-      navigate(`/messages/${existing.id}`);
-    } else {
-      navigate(`/messages?new=true&listingId=${listing.id}&userId=${listing.owner_id}`);
+  const handleMessage = async () => {
+    if (!user) { navigate("/login"); return; }
+    try {
+      const conv = await apiPost<any>("/conversations", { listingId: Number(id), initialMessage: "Hi, I'm interested in your listing!" });
+      navigate("/messages/" + conv.id);
+    } catch {
+      toast.error("Could not start conversation");
     }
   };
 
