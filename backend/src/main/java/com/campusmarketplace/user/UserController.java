@@ -43,6 +43,11 @@ public class UserController {
         return ResponseEntity.ok(userService.forgotPassword(request));
     }
 
+    @PostMapping("/auth/verify-otp")
+    public ResponseEntity<MessageResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        return ResponseEntity.ok(userService.verifyOtp(request));
+    }
+
     @PostMapping("/auth/reset-password")
     public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         return ResponseEntity.ok(userService.resetPassword(request));

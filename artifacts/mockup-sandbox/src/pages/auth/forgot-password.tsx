@@ -129,9 +129,16 @@ export default function ForgotPassword() {
     if (!codeFilled) return;
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
-    setLoading(false);
-    navigate("/reset-password", { state: { email, otp: code.join("") } });
+    try {
+      await apiPost("/auth/verify-otp", { email, otp: code.join("") });
+      setLoading(false);
+      navigate("/reset-password", { state: { email, otp: code.join("") } });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid code. Please try again.");
+      setCode(Array(CODE_LENGTH).fill(""));
+      codeRefs.current[0]?.focus();
+      setLoading(false);
+    }
   };
 
   const emailStep = (
