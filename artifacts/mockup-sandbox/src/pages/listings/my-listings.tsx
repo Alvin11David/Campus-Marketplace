@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, MoreVertical, Pencil, Play, Pause, Trash2 } from "lucide-react";
@@ -17,8 +17,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { ListingCard } from "@/components/shared/listing-card";
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_LISTINGS } from "@/lib/mock-data";
-import type { Listing } from "@/lib/api";
+import { apiGet, apiPatch, apiDelete, mapListing, type Listing } from "@/lib/api";
 
 type StatusFilter = "all" | "active" | "paused" | "draft" | "deleted";
 
@@ -35,11 +34,18 @@ export default function MyListingsPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [deleteTarget, setDeleteTarget] = useState<Listing | null>(null);
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const myListings = user
-    ? listings.filter((l) => l.owner_id === user.id)
-    : [];
+  useEffect(() => {
+    setLoading(true);
+    apiGet<any[]>("/listings/mine")
+      .then((data) => setListings((data ?? []).map(mapListing)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const myListings = listings;
 
   const filteredListings =
     statusFilter === "all"
@@ -47,26 +53,34 @@ export default function MyListingsPage() {
       : myListings.filter((l) => l.status === statusFilter);
 
   const toggleStatus = (listing: Listing) => {
+    const newStatus = listing.status === "active" ? "paused" : "active";
     setListings((prev) =>
       prev.map((l) =>
-        l.id === listing.id
-          ? { ...l, status: l.status === "active" ? ("paused" as const) : ("active" as const) }
-          : l
+        l.id === listing.id ? { ...l, status: newStatus } : l
       )
     );
-    const newStatus = listing.status === "active" ? "paused" : "active";
-    toast.success(`Listing ${newStatus === "active" ? "activated" : "paused"}`);
+    apiPatch("/listings/" + listing.id + "/status", { status: newStatus })
+      .then(() => toast.success(`Listing ${newStatus === "active" ? "activated" : "paused"}`))
+      .catch(() => {
+        setListings((prev) =>
+          prev.map((l) =>
+            l.id === listing.id ? { ...l, status: listing.status } : l
+          )
+        );
+        toast.error("Failed to update status");
+      });
   };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
-    setListings((prev) =>
-      prev.map((l) =>
-        l.id === deleteTarget.id ? { ...l, status: "deleted" as const } : l
-      )
-    );
+    const target = deleteTarget;
     setDeleteTarget(null);
-    toast.success("Listing deleted");
+    apiDelete("/listings/" + target.id)
+      .then(() => {
+        setListings((prev) => prev.filter((l) => l.id !== target.id));
+        toast.success("Listing deleted");
+      })
+      .catch(() => toast.error("Failed to delete listing"));
   };
 
   const statusCounts = {
