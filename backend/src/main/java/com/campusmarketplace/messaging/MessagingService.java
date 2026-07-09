@@ -76,6 +76,7 @@ public class MessagingService {
         }).toList();
     }
 
+    @Transactional
     public List<MessageResponse> getMessages(Long conversationId, User user) {
         var conversation = conversationRepository.findByIdWithDetails(conversationId)
             .orElseThrow(() -> ApiException.notFound("Conversation not found"));
