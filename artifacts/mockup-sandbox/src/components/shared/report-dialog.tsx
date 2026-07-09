@@ -49,14 +49,26 @@ export function ReportDialog({ targetType, targetId, targetLabel, trigger }: Rep
   const handleSubmit = async () => {
     if (!reason) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setSubmitting(false);
-    setOpen(false);
-    setReason("");
-    setDescription("");
-    toast.success("Report submitted", {
-      description: "Thank you. Our moderation team will review this content.",
-    });
+    try {
+      await apiPost("/reports", {
+        target_type: targetType,
+        target_id: targetId,
+        reason,
+        description,
+      });
+      setOpen(false);
+      setReason("");
+      setDescription("");
+      toast.success("Report submitted", {
+        description: "Thank you. Our moderation team will review this content.",
+      });
+    } catch (err) {
+      toast.error("Failed to submit report", {
+        description: err instanceof Error ? err.message : "Please try again later.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
