@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Printer, Wrench, BookOpen, Scissors, Sparkles, Package } from "lucide-react";
@@ -10,9 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { ListingCard } from "@/components/shared/listing-card";
 import { FilterDrawer } from "@/components/shared/filter-drawer";
-import { MOCK_CATEGORIES, MOCK_LISTINGS } from "@/lib/mock-data";
-import { CATEGORY_ICONS, CAMPUS_LOCATIONS } from "@/lib/api";
-import type { Listing } from "@/lib/api";
+import { apiGet, mapCategory, mapListing } from "@/lib/api";
+import type { Listing, Category } from "@/lib/api";
 
 const iconMap: Record<string, React.ElementType> = {
   Printer, Wrench, BookOpen,
@@ -60,66 +59,51 @@ function CategoryPageSkeleton() {
 export default function CategoryPage() {
   const { slug } = useParams<{ slug: string }>();
   const [filters, setFilters] = useState<Filters>(defaultFilters);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [catError, setCatError] = useState(false);
 
   useEffect(() => {
+    if (!slug) return;
     setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, [slug]);
+    setCatError(false);
 
-  const category = useMemo(
-    () => MOCK_CATEGORIES.find((c) => c.slug === slug),
-    [slug],
-  );
+    apiGet<any>(`/categories/${slug}`)
+      .then((catData) => {
+        const cat = mapCategory(catData);
+        setCategory(cat);
 
-  const filteredListings = useMemo(() => {
-    if (!category) return [];
+        const params = new URLSearchParams();
+        params.set("categoryId", String(cat.id));
+        params.set("page", "0");
+        params.set("pageSize", "50");
+        if (filters.minPrice) params.set("minPrice", filters.minPrice);
+        if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+        if (filters.campusLocation && filters.campusLocation !== "all") {
+          params.set("campusLocationId", filters.campusLocation);
+        }
+        if (filters.sortBy) params.set("sortBy", filters.sortBy);
 
-    let list = MOCK_LISTINGS.filter(
-      (l) => l.category.name === category.name && l.status === "active",
-    );
-
-    if (filters.minPrice) {
-      const min = Number.parseFloat(filters.minPrice);
-      if (!Number.isNaN(min)) {
-        list = list.filter((l) => Number.parseFloat(l.price) >= min);
-      }
-    }
-    if (filters.maxPrice) {
-      const max = Number.parseFloat(filters.maxPrice);
-      if (!Number.isNaN(max)) {
-        list = list.filter((l) => Number.parseFloat(l.price) <= max);
-      }
-    }
-    if (filters.campusLocation && filters.campusLocation !== "all") {
-      const locId = Number.parseInt(filters.campusLocation, 10);
-      list = list.filter((l) => l.campus_location_id === locId);
-    }
-    if (filters.minRating && filters.minRating !== "all") {
-      const minRat = Number.parseFloat(filters.minRating);
-      if (!Number.isNaN(minRat)) {
-        list = list.filter((l) => l.avg_rating != null && l.avg_rating >= minRat);
-      }
-    }
-
-    switch (filters.sortBy) {
-      case "price_asc":
-        list.sort((a, b) => Number.parseFloat(a.price) - Number.parseFloat(b.price));
-        break;
-      case "price_desc":
-        list.sort((a, b) => Number.parseFloat(b.price) - Number.parseFloat(a.price));
-        break;
-      case "rating_desc":
-        list.sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0));
-        break;
-      case "newest":
-        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-    }
-
-    return list;
-  }, [category, filters]);
+        return apiGet<any>(`/listings?${params.toString()}`);
+      })
+      .then((data) => {
+        let list: Listing[] = ((data as any)?.content ?? []).map(mapListing);
+        if (filters.minRating && filters.minRating !== "all") {
+          const minRat = Number.parseFloat(filters.minRating);
+          if (!Number.isNaN(minRat)) {
+            list = list.filter((l) => l.avg_rating != null && l.avg_rating >= minRat);
+          }
+        }
+        setListings(list);
+      })
+      .catch(() => {
+        setCategory(null);
+        setCatError(true);
+        setListings([]);
+      })
+      .finally(() => setLoading(false));
+  }, [slug, filters]);
 
   const activeFilterCount = useMemo(
     () =>
@@ -128,7 +112,7 @@ export default function CategoryPage() {
     [filters],
   );
 
-  if (!category) {
+  if (catError) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
         <BackButton fallback="/categories" label="Back to Categories" className="mb-6" />
@@ -143,8 +127,7 @@ export default function CategoryPage() {
 
   if (loading) return <CategoryPageSkeleton />;
 
-  const iconName = CATEGORY_ICONS[category.name] || "Package";
-  const Icon = iconMap[iconName] || Package;
+  const Icon = iconMap[category?.icon_name ?? "Package"] || Package;
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,9 +145,9 @@ export default function CategoryPage() {
               <Icon className="h-7 w-7" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{category.name}</h1>
-              {category.description && (
-                <p className="mt-1 text-muted-foreground">{category.description}</p>
+              <h1 className="text-3xl font-bold tracking-tight">{category!.name}</h1>
+              {category!.description && (
+                <p className="mt-1 text-muted-foreground">{category!.description}</p>
               )}
             </div>
           </div>
@@ -172,7 +155,7 @@ export default function CategoryPage() {
 
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {filteredListings.length} listing{filteredListings.length !== 1 ? "s" : ""} found
+            {listings.length} listing{listings.length !== 1 ? "s" : ""} found
           </p>
           <FilterDrawer
             filters={filters}
@@ -181,7 +164,7 @@ export default function CategoryPage() {
           />
         </div>
 
-        {filteredListings.length === 0 ? (
+        {listings.length === 0 ? (
           <CartoonEmpty
             variant="shelf"
             title="No listings in this category"
@@ -195,7 +178,7 @@ export default function CategoryPage() {
             variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
             className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
           >
-            {filteredListings.map((listing) => (
+            {listings.map((listing) => (
               <motion.div
                 key={listing.id}
                 variants={{
