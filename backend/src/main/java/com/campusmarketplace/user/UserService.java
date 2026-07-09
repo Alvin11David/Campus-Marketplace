@@ -65,6 +65,22 @@ public class UserService {
     }
 
     @Transactional
+    public MessageResponse verifyOtp(VerifyOtpRequest request) {
+        var user = userRepository.findByEmail(request.email())
+            .orElseThrow(() -> ApiException.badRequest("Invalid or expired code"));
+
+        var token = passwordResetTokenRepository
+            .findByUserIdAndOtpAndUsedFalse(user.getId(), request.otp())
+            .orElseThrow(() -> ApiException.badRequest("Invalid or expired code"));
+
+        if (!token.isValid()) {
+            throw ApiException.badRequest("Code has expired. Please request a new one.");
+        }
+
+        return new MessageResponse("Code verified successfully.");
+    }
+
+    @Transactional
     public MessageResponse forgotPassword(ForgotPasswordRequest request) {
         var userOpt = userRepository.findByEmail(request.email());
 
