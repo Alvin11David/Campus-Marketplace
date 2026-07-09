@@ -62,3 +62,10 @@
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
 2026-07-09T15:40:42.634+03:00  INFO 1596 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-09T15:40:43.635+03:00  INFO 1596 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-09T15:40:43.924+03:00  INFO 1596 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-09T15:40:46.105+03:00  INFO 1596 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-07-09T15:40:46.193+03:00  WARN 1596 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-09T15:40:46.797+03:00  INFO 1596 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-07-09T15:40:46.808+03:00  INFO 1596 --- [           main] c.c.CampusMarketplaceApplication         : Started CampusMarketplaceApplication in 8.195 seconds (process running for 8.509)
+2026-07-09T15:40:46.870+03:00  INFO 1596 --- [           main] c.campusmarketplace.config.DataSeeder    : Database already seeded, skipping.
