@@ -66,27 +66,26 @@ const quickLinks = [
 export default function AdminDashboard() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [analytics, setAnalytics] = useState<any>(null);
+
+  useEffect(() => {
+    apiGet<any>("/admin/analytics/overview")
+      .then(setAnalytics)
+      .catch(() => {});
+  }, []);
 
   const chartData = useMemo(() => {
-    let data = MOCK_ANALYTICS.listings_by_category;
-    if (fromDate || toDate) {
-      const from = fromDate ? new Date(fromDate) : null;
-      const to = toDate ? new Date(toDate) : null;
-      data = data
-        .filter(() => Math.random() > 0.3)
-        .map((d) => ({
-          ...d,
-          count: Math.max(1, d.count - (fromDate ? 1 : 0) - (toDate ? 1 : 0)),
-        }))
-        .filter((d) => d.count > 0);
-    }
-    return data;
-  }, [fromDate, toDate]);
+    if (!analytics?.listings_by_category) return [];
+    return analytics.listings_by_category.map((d: any) => ({
+      category: d.category_name,
+      count: d.listing_count,
+    }));
+  }, [analytics]);
 
   const kpiCards: KpiCardProps[] = [
     {
       label: "Total Users",
-      value: MOCK_ANALYTICS.total_users,
+      value: analytics?.total_users ?? 0,
       icon: Users,
       bgClass: "bg-blue-50 dark:bg-blue-950/40",
       iconClass: "text-blue-600 dark:text-blue-400",
@@ -94,7 +93,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Active Listings",
-      value: MOCK_ANALYTICS.total_active_listings,
+      value: analytics?.total_active_listings ?? 0,
       icon: ShoppingBag,
       bgClass: "bg-green-50 dark:bg-green-950/40",
       iconClass: "text-green-600 dark:text-green-400",
@@ -102,7 +101,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Messages Sent",
-      value: MOCK_ANALYTICS.total_messages_sent,
+      value: analytics?.total_messages_sent ?? 0,
       icon: MessageSquare,
       bgClass: "bg-amber-50 dark:bg-amber-950/40",
       iconClass: "text-amber-600 dark:text-amber-400",
@@ -110,7 +109,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Platform Rating",
-      value: MOCK_ANALYTICS.platform_avg_rating.toFixed(1),
+      value: analytics?.platform_avg_rating != null ? Number(analytics.platform_avg_rating).toFixed(1) : "0.0",
       icon: Star,
       bgClass: "bg-purple-50 dark:bg-purple-950/40",
       iconClass: "text-purple-600 dark:text-purple-400",
@@ -118,7 +117,7 @@ export default function AdminDashboard() {
     },
     {
       label: "New Users (This Week)",
-      value: MOCK_ANALYTICS.new_users_this_week,
+      value: analytics?.new_users_this_week ?? 0,
       icon: UserPlus,
       bgClass: "bg-cyan-50 dark:bg-cyan-950/40",
       iconClass: "text-cyan-600 dark:text-cyan-400",
@@ -126,7 +125,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Total Reviews",
-      value: MOCK_ANALYTICS.total_reviews_submitted,
+      value: analytics?.total_reviews_submitted ?? 0,
       icon: ThumbsUp,
       bgClass: "bg-pink-50 dark:bg-pink-950/40",
       iconClass: "text-pink-600 dark:text-pink-400",
