@@ -32,7 +32,13 @@ const defaultForm: CategoryForm = {
 };
 
 export default function AdminCategories() {
-  const [categories, setCategories] = useState(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    apiGet<any[]>("/categories")
+      .then((data) => setCategories((data ?? []).map(mapCategory)))
+      .catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
