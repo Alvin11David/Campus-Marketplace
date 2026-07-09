@@ -33,13 +33,15 @@ export default function CreateListingPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [campusLocationId, setCampusLocationId] = useState("");
-  const [stockQuantity, setStockQuantity] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [images, setImages] = useState<string[]>([]);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [publishing, setPublishing] = useState(false);
+const [categoryId, setCategoryId] = useState("");
+const [customCategoryName, setCustomCategoryName] = useState("");
+const [showCustomCategory, setShowCustomCategory] = useState(false);
+const [campusLocationId, setCampusLocationId] = useState("");
+const [stockQuantity, setStockQuantity] = useState("");
+const [categories, setCategories] = useState<Category[]>([]);
+const [images, setImages] = useState<string[]>([]);
+const [errors, setErrors] = useState<FormErrors>({});
+const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     apiGet<any[]>("/categories")
@@ -58,7 +60,7 @@ export default function CreateListingPage() {
     if (!description.trim()) newErrors.description = "Description is required";
     if (!price.trim() || isNaN(Number(price)) || Number(price) <= 0)
       newErrors.price = "Valid price is required";
-    if (!categoryId) newErrors.category_id = "Category is required";
+    if (!categoryId && !customCategoryName.trim()) newErrors.category_id = "Category is required";
     if (!campusLocationId) newErrors.campus_location_id = "Campus location is required";
     if (listingType === "product" && (!stockQuantity.trim() || isNaN(Number(stockQuantity)) || Number(stockQuantity) < 0))
       newErrors.stock_quantity = "Valid stock quantity is required";
@@ -70,11 +72,22 @@ export default function CreateListingPage() {
     if (!validate()) return;
     setPublishing(true);
     try {
+      let resolvedCategoryId = categoryId;
+
+      if (!resolvedCategoryId && customCategoryName.trim()) {
+        const newCat = await apiPost<any>("/categories", {
+          name: customCategoryName.trim(),
+          listingTypeHint: listingType,
+        });
+        resolvedCategoryId = String(newCat.id);
+        setCategories((prev) => [...prev, { ...newCat, icon_name: newCat.iconName ?? "Package", listing_type_hint: newCat.listingTypeHint, is_active: true, active_listing_count: 0 }]);
+      }
+
       const data = await apiPost<any>("/listings", {
         title,
         description,
         listingType: listingType,
-        categoryId: Number(categoryId),
+        categoryId: Number(resolvedCategoryId),
         price: Number(price),
         currency: "UGX",
         stockQuantity: listingType === "product" ? Number(stockQuantity) : null,
@@ -181,18 +194,48 @@ export default function CreateListingPage() {
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger id="category" className={errors.category_id ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id.toString()}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {showCustomCategory ? (
+                <div className="flex gap-2">
+                  <Input
+                    value={customCategoryName}
+                    onChange={(e) => setCustomCategoryName(e.target.value)}
+                    placeholder="Type a new category name"
+                    className={errors.category_id ? "border-destructive" : ""}
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setShowCustomCategory(false); setCustomCategoryName(""); }}
+                    className="shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Select value={categoryId} onValueChange={(v) => {
+                  if (v === "__custom__") {
+                    setShowCustomCategory(true);
+                    setCategoryId("");
+                  } else {
+                    setCategoryId(v);
+                    setCustomCategoryName("");
+                  }
+                }}>
+                  <SelectTrigger id="category" className={errors.category_id ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id.toString()}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__custom__">+ Add new category...</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
               {errors.category_id && <p className="text-sm text-destructive">{errors.category_id}</p>}
             </div>
           </div>
