@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -19,10 +19,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MOCK_NOTIFICATIONS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { Notification } from "@/lib/api";
+import { apiGet, mapNotification, type Notification } from "@/lib/api";
 
 const iconMap: Record<string, React.ElementType> = {
   new_message: MessageSquare,
@@ -40,14 +39,23 @@ type ViewTab = "active" | "archived";
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const [active, setActive] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const [active, setActive] = useState<Notification[]>([]);
   const [archived, setArchived] = useState<Notification[]>([]);
   const [view, setView] = useState<ViewTab>("active");
+  const [loading, setLoading] = useState(true);
 
   const unreadCount = useMemo(
     () => active.filter((n) => !n.is_read).length,
     [active],
   );
+
+  useEffect(() => {
+    setLoading(true);
+    apiGet<{ results: any[] }>("/notifications?page=0&pageSize=50")
+      .then((data) => setActive((data.results ?? []).map(mapNotification)))
+      .catch(() => toast.error("Failed to load notifications"))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleMarkAllRead = useCallback(() => {
     setActive((prev) => prev.map((n) => ({ ...n, is_read: true })));

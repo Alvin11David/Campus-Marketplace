@@ -165,12 +165,26 @@ export function mapMessage(data: any): Message {
 
 export interface Notification {
   id: number;
-  type: string;
+  notif_type: string;
   title: string;
-  message: string;
+  body: string;
   is_read: boolean;
-  related_listing_id: number | null;
+  related_type: string | null;
+  related_id: number | null;
   created_at: string;
+}
+
+export function mapNotification(data: any): Notification {
+  return {
+    id: data.id,
+    notif_type: data.notifType,
+    title: data.title,
+    body: data.body ?? "",
+    is_read: data.isRead ?? false,
+    related_type: data.relatedType ?? null,
+    related_id: data.relatedId ?? null,
+    created_at: data.createdAt,
+  };
 }
 
 export interface Review {
