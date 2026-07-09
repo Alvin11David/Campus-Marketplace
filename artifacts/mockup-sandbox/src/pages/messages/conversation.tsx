@@ -270,17 +270,46 @@ export default function ConversationPage() {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const conversation = MOCK_CONVERSATIONS.find((c) => c.id === Number(id));
+  const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [convLoaded, setConvLoaded] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (id) {
-      const msgs = (MOCK_MESSAGES[Number(id)] || []).map((m) =>
-        m.sender_id !== user?.id ? { ...m, is_read: true } : m
-      );
-      setMessages(msgs);
-      setListingUnavailable(false);
-    }
+    if (!id) return;
+    let cancelled = false;
+    setConvLoaded(false);
+    setConversation(null);
+    setMessages([]);
+    setListingUnavailable(false);
+
+    Promise.all([
+      apiGet<any[]>("/conversations").then((list) => {
+        const found = list.find((c) => c.id === Number(id));
+        if (found && !cancelled) setConversation(mapConversation(found));
+      }),
+      apiGet<any[]>("/conversations/" + id + "/messages").then((list) => {
+        if (!cancelled) {
+          setMessages(
+            list.map((m) => ({
+              ...mapMessage(m),
+              conversation_id: Number(id),
+            }))
+          );
+        }
+      }),
+    ])
+      .catch(() => {
+        if (!cancelled) setConversation(null);
+      })
+      .finally(() => {
+        if (!cancelled) setConvLoaded(true);
+      });
+
+    apiPost("/conversations/" + id + "/mark-read", {}).catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, user?.id]);
 
   useEffect(() => {
@@ -335,8 +364,8 @@ export default function ConversationPage() {
     setPendingFile(null);
   }, []);
 
-  const handleSend = () => {
-    if ((!newMessage.trim() && !pendingFile) || !user || !conversation) return;
+  const handleSend = async () => {
+    if ((!newMessage.trim() && !pendingFile) || !user || !conversation || !id) return;
 
     let body = newMessage.trim();
     if (pendingFile) {
@@ -346,22 +375,22 @@ export default function ConversationPage() {
       body = body ? `${body}\n${label}` : label;
     }
 
-    const msg: Message = {
-      id: Date.now(),
-      conversation_id: conversation.id,
-      sender_id: user.id,
-      body,
-      is_read: false,
-      created_at: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, msg]);
-    setNewMessage("");
-    setPendingFile(null);
-    setReplyTo(null);
-    setIsTyping(false);
-    setTimeout(scrollToBottom, 50);
-    toast.success("Message sent");
+    try {
+      const created = await apiPost<any>("/conversations/" + id + "/messages", { body });
+      const msg: Message = {
+        ...mapMessage(created),
+        conversation_id: Number(id),
+      };
+      setMessages((prev) => [...prev, msg]);
+      setNewMessage("");
+      setPendingFile(null);
+      setReplyTo(null);
+      setIsTyping(false);
+      setTimeout(scrollToBottom, 50);
+      toast.success("Message sent");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -410,6 +439,15 @@ export default function ConversationPage() {
   const handleReportUser = () => {
     toast.success("Report submitted", { description: "We'll review this shortly." });
   };
+
+  if (!convLoaded) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <span className="ml-3 text-sm text-muted-foreground">Loading conversation...</span>
+      </div>
+    );
+  }
 
   if (!conversation) {
     return (
