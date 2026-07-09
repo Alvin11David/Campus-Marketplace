@@ -1,11 +1,11 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Printer, Wrench, BookOpen, Scissors, Sparkles, Package } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_CATEGORIES } from "@/lib/mock-data";
-import { CATEGORY_ICONS } from "@/lib/api";
+import { apiGet, mapCategory, type Category } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -33,6 +33,17 @@ const item = {
 };
 
 export default function CategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    apiGet<any[]>("/categories")
+      .then((data) => setCategories((data ?? []).map(mapCategory)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 3xl:max-w-[1600px] 4xl:max-w-[1920px]">
@@ -51,45 +62,51 @@ export default function CategoriesPage() {
           </motion.div>
         </div>
 
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
-        >
-          {MOCK_CATEGORIES.map((category, i) => {
-            const iconName = CATEGORY_ICONS[category.name] || "Package";
-            const Icon = iconMap[iconName] || Package;
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="ml-3 text-sm text-muted-foreground">Loading categories...</span>
+          </div>
+        ) : (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
+          >
+            {categories.map((category, i) => {
+              const Icon = iconMap[category.icon_name] || Package;
 
-            return (
-              <motion.div key={category.id} variants={item}>
-                <Link to={`/categories/${category.slug}`} className="block h-full">
-                  <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 border-primary/5 group cursor-pointer overflow-hidden">
-                    <CardContent className="flex flex-col items-center p-6 text-center">
-                      <div
-                        className={cn(
-                          "mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
-                          gradients[i % gradients.length]
+              return (
+                <motion.div key={category.id} variants={item}>
+                  <Link to={`/categories/${category.slug}`} className="block h-full">
+                    <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 border-primary/5 group cursor-pointer overflow-hidden">
+                      <CardContent className="flex flex-col items-center p-6 text-center">
+                        <div
+                          className={cn(
+                            "mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
+                            gradients[i % gradients.length]
+                          )}
+                        >
+                          <Icon className="h-7 w-7 text-primary" />
+                        </div>
+                        <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{category.name}</h3>
+                        {category.description && (
+                          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                            {category.description}
+                          </p>
                         )}
-                      >
-                        <Icon className="h-7 w-7 text-primary" />
-                      </div>
-                      <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{category.name}</h3>
-                      {category.description && (
-                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                          {category.description}
-                        </p>
-                      )}
-                      <Badge variant="secondary" className="mt-3 bg-secondary/10">
-                        {category.active_listing_count} listing{category.active_listing_count !== 1 ? "s" : ""}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                        <Badge variant="secondary" className="mt-3 bg-secondary/10">
+                          {category.active_listing_count} listing{category.active_listing_count !== 1 ? "s" : ""}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
       </div>
     </div>
   );
