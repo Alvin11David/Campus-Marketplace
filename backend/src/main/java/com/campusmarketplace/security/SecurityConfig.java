@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/listings/**").permitAll()
                 .requestMatchers("/api/v1/users/*/reviews").permitAll()
                 .requestMatchers("/api/v1/listings/*/reviews").permitAll()
+                .requestMatchers(request -> request.getServletPath().matches("/api/v1/users/\\d+")).permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
