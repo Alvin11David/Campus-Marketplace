@@ -13,8 +13,8 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_CONVERSATIONS, MOCK_NOTIFICATIONS } from "@/lib/mock-data";
-import { useState } from "react";
+import { apiGet } from "@/lib/api";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
