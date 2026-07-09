@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ImagePlus, X, Save, Send } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
 import { toast } from "sonner";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet, apiPost, mapCategory } from "@/lib/api";
+import { apiGet, apiPost, mapCategory, CAMPUS_LOCATIONS } from "@/lib/api";
 import type { Category } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -294,10 +294,10 @@ export default function CreateListingPage() {
           <Link to="/my-listings">Cancel</Link>
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleSaveDraft} disabled={publishing} className="gap-2">
-            <Save className="h-4 w-4" /> Save as Draft
+          <Button variant="outline" onClick={() => createListing()} disabled={publishing} className="gap-2">
+            <Save className="h-4 w-4" /> {publishing ? "Saving..." : "Save as Draft"}
           </Button>
-          <Button onClick={handlePublish} disabled={publishing} className="gap-2">
+          <Button onClick={() => createListing()} disabled={publishing} className="gap-2">
             <Send className="h-4 w-4" />
             {publishing ? "Publishing..." : "Publish"}
           </Button>
