@@ -22,14 +22,7 @@ const dailyData = [
   { date: "Sun", users: 8, searches: 25, messages: 15 },
 ];
 
-const statCards = [
-  { label: "Total Users", value: MOCK_ANALYTICS.total_users, icon: Users, bgClass: "bg-blue-50 dark:bg-blue-950/40", iconClass: "text-blue-600 dark:text-blue-400" },
-  { label: "New This Week", value: MOCK_ANALYTICS.new_users_this_week, icon: UserPlus, bgClass: "bg-emerald-50 dark:bg-emerald-950/40", iconClass: "text-emerald-600 dark:text-emerald-400" },
-  { label: "Active Listings", value: MOCK_ANALYTICS.total_active_listings, icon: ShoppingBag, bgClass: "bg-green-50 dark:bg-green-950/40", iconClass: "text-green-600 dark:text-green-400" },
-  { label: "Total Messages", value: MOCK_ANALYTICS.total_messages_sent, icon: MessageSquare, bgClass: "bg-amber-50 dark:bg-amber-950/40", iconClass: "text-amber-600 dark:text-amber-400" },
-  { label: "Total Reviews", value: MOCK_ANALYTICS.total_reviews_submitted, icon: FileText, bgClass: "bg-rose-50 dark:bg-rose-950/40", iconClass: "text-rose-600 dark:text-rose-400" },
-  { label: "Avg Rating", value: MOCK_ANALYTICS.platform_avg_rating.toFixed(1), icon: Star, bgClass: "bg-purple-50 dark:bg-purple-950/40", iconClass: "text-purple-600 dark:text-purple-400" },
-];
+
 
 export default function AdminAnalytics() {
   const [fromDate, setFromDate] = useState("");
@@ -204,7 +197,7 @@ export default function AdminAnalytics() {
           <CardContent>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={MOCK_ANALYTICS.listings_by_category}>
+                <BarChart data={categoryChartData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis
                     dataKey="category"
