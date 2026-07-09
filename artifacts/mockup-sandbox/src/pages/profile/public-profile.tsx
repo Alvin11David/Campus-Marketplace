@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { MapPin, BadgeCheck, Calendar, Flag, Package, Store, Star, MessageCircle } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
@@ -233,10 +233,10 @@ export default function PublicProfilePage() {
               <Star className="h-5 w-5 text-amber-400" />
               Reviews
             </CardTitle>
-            <CardDescription>{userReviews.length} review{userReviews.length !== 1 ? "s" : ""}</CardDescription>
+            <CardDescription>{reviews.length} review{reviews.length !== 1 ? "s" : ""}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {userReviews.map((review, idx) => (
+            {reviews.map((review, idx) => (
               <motion.div
                 key={review.id}
                 initial={{ opacity: 0, y: 8 }}
