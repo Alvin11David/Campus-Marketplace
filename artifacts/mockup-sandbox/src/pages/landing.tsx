@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "fra
 import { ArrowRight, LogIn, Search, MessageSquare, Handshake, Printer, Wrench, BookOpen, Scissors, Sparkles, Package, Star, Users, ShoppingBag, Zap, TrendingUp, Shield, Heart, ChevronRight, Globe, Smartphone, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MOCK_CATEGORIES } from "@/lib/mock-data";
+import { apiGet, mapCategory } from "@/lib/api";
 import type { Category } from "@/lib/api";
 import { useEffect, useState, useRef } from "react";
 import { GitHubStarsWheel } from "@/components/shared/github-stars-wheel";
@@ -100,6 +100,14 @@ export default function Landing() {
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    apiGet<any[]>("/categories")
+      .then((data) => setCategories((data ?? []).map(mapCategory)))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -458,7 +466,7 @@ export default function Landing() {
         </motion.div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10">
-          {MOCK_CATEGORIES.map((category, index) => (
+          {categories.map((category, index) => (
             <CategoryTeaserCard key={category.id} category={category} index={index} />
           ))}
         </div>
