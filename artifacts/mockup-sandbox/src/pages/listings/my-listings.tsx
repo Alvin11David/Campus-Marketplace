@@ -125,7 +125,12 @@ export default function MyListingsPage() {
         </TabsList>
       </Tabs>
 
-      {filteredListings.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span className="ml-3 text-sm text-muted-foreground">Loading listings...</span>
+        </div>
+      ) : filteredListings.length === 0 ? (
         <CartoonEmpty
           variant="listing"
           title="No listings found"
