@@ -1,5 +1,7 @@
 package com.campusmarketplace.user;
 
+import com.campusmarketplace.listing.ListingService;
+import com.campusmarketplace.listing.dto.ListingResponse;
 import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.dto.*;
 import jakarta.validation.Valid;
@@ -18,9 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final ListingService listingService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ListingService listingService) {
         this.userService = userService;
+        this.listingService = listingService;
     }
 
     @PostMapping("/auth/register")
@@ -65,6 +69,11 @@ public class UserController {
     @GetMapping("/users/{id}")
     public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getPublicProfile(id));
+    }
+
+    @GetMapping("/users/{userId}/listings")
+    public ResponseEntity<List<ListingResponse>> getUserListings(@PathVariable Long userId) {
+        return ResponseEntity.ok(listingService.getUserListings(userId));
     }
 
     @PatchMapping("/users/me")

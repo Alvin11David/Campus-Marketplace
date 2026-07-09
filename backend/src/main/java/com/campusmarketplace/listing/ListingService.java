@@ -145,6 +145,16 @@ public class ListingService {
         }).toList();
     }
 
+    public List<ListingResponse> getUserListings(Long userId) {
+        var listings = listingRepository.findByOwnerId(userId);
+        return listings.stream().map(listing -> {
+            var images = listingImageRepository.findByListingIdOrderBySortOrderAsc(listing.getId());
+            return ListingResponse.from(listing, images.stream()
+                .map(img -> new ListingResponse.ImageInfo(img.getId(), img.getImageUrl(), img.getSortOrder()))
+                .toList());
+        }).toList();
+    }
+
     @Transactional
     public ListingResponse updateListing(Long id, User currentUser, UpdateListingRequest request) {
         var listing = listingRepository.findByIdWithDetails(id)
