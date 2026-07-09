@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ShieldAlert, ShieldCheck, UserCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -19,58 +19,62 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext,
 } from "@/components/ui/pagination";
-import { MOCK_USER } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import type { User } from "@/lib/api";
 
-interface MockUser extends User {
-  listing_count: number;
-  report_count: number;
+interface AdminUser extends User {
+  listing_count?: number;
+  report_count?: number;
 }
-
-const mockUsers: MockUser[] = [
-  { ...MOCK_USER, listing_count: 5, report_count: 0 },
-  {
-    id: 2, full_name: "Taban James", email: "taban@students.vu.ac.ug", phone: "", bio: null,
-    profile_photo_url: null, campus_location_id: null, campus_location_name: null,
-    is_provider: true, is_seller: false, is_admin: false, is_verified: true,
-    is_active: true, is_suspended: false, avg_rating: 4.8, rating_count: 9,
-    created_at: "2026-05-01T10:00:00Z", listing_count: 3, report_count: 0,
-  },
-  {
-    id: 3, full_name: "Sarah Nakato", email: "sarah@students.vu.ac.ug", phone: "", bio: null,
-    profile_photo_url: null, campus_location_id: null, campus_location_name: null,
-    is_provider: true, is_seller: false, is_admin: false, is_verified: false,
-    is_active: true, is_suspended: false, avg_rating: 4.5, rating_count: 8,
-    created_at: "2026-05-03T10:00:00Z", listing_count: 2, report_count: 1,
-  },
-  {
-    id: 4, full_name: "Grace Achieng", email: "grace@students.vu.ac.ug", phone: "", bio: null,
-    profile_photo_url: null, campus_location_id: null, campus_location_name: null,
-    is_provider: true, is_seller: true, is_admin: false, is_verified: true,
-    is_active: true, is_suspended: false, avg_rating: 4.9, rating_count: 15,
-    created_at: "2026-04-28T10:00:00Z", listing_count: 4, report_count: 0,
-  },
-  {
-    id: 10, full_name: "Suspicious User", email: "suspicious@students.vu.ac.ug", phone: "", bio: null,
-    profile_photo_url: null, campus_location_id: null, campus_location_name: null,
-    is_provider: false, is_seller: true, is_admin: false, is_verified: false,
-    is_active: true, is_suspended: true, avg_rating: null, rating_count: 0,
-    created_at: "2026-06-15T10:00:00Z", listing_count: 1, report_count: 3,
-  },
-];
 
 const roleFilters = ["All", "Provider", "Seller", "Admin"] as const;
 
+function mapAdminUser(data: any): AdminUser {
+  return {
+    id: data.id,
+    full_name: data.fullName,
+    email: data.email ?? "",
+    phone: "",
+    bio: data.bio ?? null,
+    profile_photo_url: data.profilePhotoUrl ?? null,
+    campus_location_id: data.campusLocation?.id ?? null,
+    campus_location_name: data.campusLocation?.name ?? null,
+    is_provider: data.isProvider ?? false,
+    is_seller: data.isSeller ?? false,
+    is_admin: data.isAdmin ?? false,
+    is_verified: data.isVerified ?? false,
+    is_active: data.isActive ?? true,
+    is_suspended: data.isSuspended ?? false,
+    avg_rating: data.avgRating ?? null,
+    rating_count: data.ratingCount ?? 0,
+    created_at: data.createdAt ?? "",
+    listing_count: 0,
+    report_count: 0,
+  };
+}
+
 export default function AdminUsers() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("All");
-  const [suspendUser, setSuspendUser] = useState<MockUser | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [suspendUser, setSuspendUser] = useState<AdminUser | null>(null);
   const [suspendReason, setSuspendReason] = useState("");
-  const [reactivateUser, setReactivateUser] = useState<MockUser | null>(null);
-  const [verifyUser, setVerifyUser] = useState<MockUser | null>(null);
+  const [reactivateUser, setReactivateUser] = useState<AdminUser | null>(null);
+  const [verifyUser, setVerifyUser] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    apiGet<any>(`/admin/users?page=${page}&pageSize=20`)
+      .then((data) => {
+        setUsers((data.content ?? []).map(mapAdminUser));
+        setTotalPages(data.totalPages ?? 1);
+      })
+      .catch(() => {});
+  }, [page]);
 
   const filtered = useMemo(() => {
-    return mockUsers.filter((u) => {
+    return users.filter((u) => {
       const q = search.toLowerCase();
       const matchesSearch =
         !q ||
@@ -83,9 +87,9 @@ export default function AdminUsers() {
         (roleFilter === "Admin" && u.is_admin);
       return matchesSearch && matchesRole;
     });
-  }, [search, roleFilter]);
+  }, [search, roleFilter, users]);
 
-  function getRoles(user: MockUser) {
+  function getRoles(user: AdminUser) {
     const roles: { label: string; className: string }[] = [];
     if (user.is_admin) roles.push({ label: "Admin", className: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 border-red-200 dark:border-red-800" });
     if (user.is_provider) roles.push({ label: "Provider", className: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200 dark:border-blue-800" });
@@ -105,29 +109,47 @@ export default function AdminUsers() {
       .slice(0, 2);
   }
 
-  function getStatus(user: MockUser) {
+  function getStatus(user: AdminUser) {
     if (user.is_suspended) return { label: "Suspended", className: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" };
     if (user.is_active) return { label: "Active", className: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" };
     return { label: "Inactive", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" };
   }
 
-  function handleSuspend() {
+  async function handleSuspend() {
     if (!suspendUser) return;
+    try {
+      await apiPost(`/admin/users/${suspendUser.id}/suspend`, { reason: suspendReason || "No reason provided" });
+      setUsers((prev) => prev.map((u) => u.id === suspendUser.id ? { ...u, is_suspended: true } : u));
+      toast.success(`${suspendUser.full_name} has been suspended`);
+    } catch {
+      toast.error("Failed to suspend user");
+    }
     setSuspendUser(null);
     setSuspendReason("");
-    toast.success(`${suspendUser.full_name} has been suspended`);
   }
 
-  function handleReactivate() {
+  async function handleReactivate() {
     if (!reactivateUser) return;
+    try {
+      await apiPost(`/admin/users/${reactivateUser.id}/reactivate`, {});
+      setUsers((prev) => prev.map((u) => u.id === reactivateUser.id ? { ...u, is_suspended: false } : u));
+      toast.success(`${reactivateUser.full_name} has been reactivated`);
+    } catch {
+      toast.error("Failed to reactivate user");
+    }
     setReactivateUser(null);
-    toast.success(`${reactivateUser.full_name} has been reactivated`);
   }
 
-  function handleVerify() {
+  async function handleVerify() {
     if (!verifyUser) return;
+    try {
+      await apiPost(`/admin/users/${verifyUser.id}/verify`, {});
+      setUsers((prev) => prev.map((u) => u.id === verifyUser.id ? { ...u, is_verified: true } : u));
+      toast.success(`${verifyUser.full_name} has been verified`);
+    } catch {
+      toast.error("Failed to verify user");
+    }
     setVerifyUser(null);
-    toast.success(`${verifyUser.full_name} has been verified`);
   }
 
   return (
@@ -223,10 +245,10 @@ export default function AdminUsers() {
                         <Badge className={status.className}>{status.label}</Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                        {new Date(user.created_at).toLocaleDateString()}
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : "-"}
                       </TableCell>
-                      <TableCell className="text-center text-sm">{user.listing_count}</TableCell>
-                      <TableCell className="hidden sm:table-cell text-center text-sm">{user.report_count}</TableCell>
+                      <TableCell className="text-center text-sm">{user.listing_count ?? "-"}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-center text-sm">{user.report_count ?? "-"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           {!user.is_admin && (
@@ -279,19 +301,27 @@ export default function AdminUsers() {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" />
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => { e.preventDefault(); if (page > 0) setPage(page - 1); }}
+            />
           </PaginationItem>
+          {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+            <PaginationItem key={i}>
+              <PaginationLink
+                href="#"
+                isActive={page === i}
+                onClick={(e) => { e.preventDefault(); setPage(i); }}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
           <PaginationItem>
-            <PaginationLink href="#" isActive>1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">2</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
+            <PaginationNext
+              href="#"
+              onClick={(e) => { e.preventDefault(); if (page < totalPages - 1) setPage(page + 1); }}
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
