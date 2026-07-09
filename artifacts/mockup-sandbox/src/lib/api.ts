@@ -109,6 +109,7 @@ export interface Listing {
   stock_quantity: number | null;
   owner: ListingOwner;
   images: ListingImage[];
+  avg_rating: number | null;
   category_id: number;
   category_name: string;
   category: { id: number; name: string };
@@ -136,6 +137,7 @@ export function mapListing(data: any): Listing {
     primary_image_url: data.primaryImageUrl ?? null,
     currency: data.currency ?? "UGX",
     stock_quantity: data.stockQuantity ?? null,
+    avg_rating: data.avgRating ?? null,
     owner: {
       id: data.owner.id,
       full_name: data.owner.fullName,
