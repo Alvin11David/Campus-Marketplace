@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ImagePlus, X, Save, Trash2, AlertTriangle } from "lucide-react";
@@ -163,10 +163,21 @@ export default function EditListingPage() {
     }
   };
 
-  const handleImageSelect = () => {
-    if (images.length < 5) {
-      setImages((prev) => [...prev, `mock-image-${prev.length + 1}`]);
-    }
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const remaining = 5 - images.length;
+    const selected = files.slice(0, remaining);
+
+    selected.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setImages((prev) => [...prev, ev.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
   };
 
   const removeImage = (idx: number) => {
@@ -307,10 +318,33 @@ export default function EditListingPage() {
           <CardDescription>Upload up to 5 images (optional)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
           <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
+              const remaining = 5 - images.length;
+              const selected = files.slice(0, remaining);
+              selected.forEach((file) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  setImages((prev) => [...prev, ev.target?.result as string]);
+                };
+                reader.readAsDataURL(file);
+              });
+            }}
             className={cn(
-              "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
-              images.length >= 5 ? "border-muted bg-muted/20" : "border-muted-foreground/25 hover:border-primary/50"
+              "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
+              images.length >= 5 ? "border-muted bg-muted/20 cursor-default" : "border-muted-foreground/25 hover:border-primary/50"
             )}
           >
             {images.length >= 5 ? (
@@ -319,7 +353,7 @@ export default function EditListingPage() {
               <div className="space-y-2">
                 <ImagePlus className="h-10 w-10 mx-auto text-muted-foreground" />
                 <p className="text-sm font-medium">Drag and drop images here</p>
-                <p className="text-xs text-muted-foreground">or click the button below to select files</p>
+                <p className="text-xs text-muted-foreground">or click to select files</p>
               </div>
             )}
           </div>
@@ -328,7 +362,7 @@ export default function EditListingPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={handleImageSelect}
+              onClick={() => fileInputRef.current?.click()}
               disabled={images.length >= 5}
               className="gap-2"
             >
@@ -339,9 +373,9 @@ export default function EditListingPage() {
 
           {images.length > 0 && (
             <div className="flex flex-wrap gap-3">
-              {images.map((_, idx) => (
-                <div key={idx} className="relative h-20 w-20 rounded-md bg-muted flex items-center justify-center group">
-                  <span className="text-xs text-muted-foreground">Image {idx + 1}</span>
+              {images.map((src, idx) => (
+                <div key={idx} className="relative h-20 w-20 rounded-md overflow-hidden bg-muted group">
+                  <img src={src} alt={`Preview ${idx + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removeImage(idx)}
