@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Download, Users, ShoppingBag, MessageSquare, Star, UserPlus, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MOCK_ANALYTICS } from "@/lib/mock-data";
+import { apiGet } from "@/lib/api";
 
 const dailyData = [
   { date: "Mon", users: 12, searches: 45, messages: 28 },
@@ -34,24 +34,45 @@ const statCards = [
 export default function AdminAnalytics() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [analytics, setAnalytics] = useState<any>(null);
+
+  useEffect(() => {
+    apiGet<any>("/admin/analytics/overview")
+      .then(setAnalytics)
+      .catch(() => {});
+  }, []);
+
+  const categoryChartData = (analytics?.listings_by_category ?? []).map((d: any) => ({
+    category: d.category_name,
+    count: d.listing_count,
+  }));
+
+  const statCards = [
+    { label: "Total Users", value: analytics?.total_users ?? 0, icon: Users, bgClass: "bg-blue-50 dark:bg-blue-950/40", iconClass: "text-blue-600 dark:text-blue-400" },
+    { label: "New This Week", value: analytics?.new_users_this_week ?? 0, icon: UserPlus, bgClass: "bg-emerald-50 dark:bg-emerald-950/40", iconClass: "text-emerald-600 dark:text-emerald-400" },
+    { label: "Active Listings", value: analytics?.total_active_listings ?? 0, icon: ShoppingBag, bgClass: "bg-green-50 dark:bg-green-950/40", iconClass: "text-green-600 dark:text-green-400" },
+    { label: "Total Messages", value: analytics?.total_messages_sent ?? 0, icon: MessageSquare, bgClass: "bg-amber-50 dark:bg-amber-950/40", iconClass: "text-amber-600 dark:text-amber-400" },
+    { label: "Total Reviews", value: analytics?.total_reviews_submitted ?? 0, icon: FileText, bgClass: "bg-rose-50 dark:bg-rose-950/40", iconClass: "text-rose-600 dark:text-rose-400" },
+    { label: "Avg Rating", value: analytics?.platform_avg_rating != null ? Number(analytics.platform_avg_rating).toFixed(1) : "0.0", icon: Star, bgClass: "bg-purple-50 dark:bg-purple-950/40", iconClass: "text-purple-600 dark:text-purple-400" },
+  ];
 
   const handleExportCSV = () => {
     const headers = ["Metric", "Value"];
-    const rows = [
-      ["Total Users", MOCK_ANALYTICS.total_users.toString()],
-      ["New This Week", MOCK_ANALYTICS.new_users_this_week.toString()],
-      ["Active Listings", MOCK_ANALYTICS.total_active_listings.toString()],
-      ["Total Messages", MOCK_ANALYTICS.total_messages_sent.toString()],
-      ["Total Reviews", MOCK_ANALYTICS.total_reviews_submitted.toString()],
-      ["Avg Rating", MOCK_ANALYTICS.platform_avg_rating.toFixed(1)],
+    const rows: string[][] = [
+      ["Total Users", String(analytics?.total_users ?? 0)],
+      ["New This Week", String(analytics?.new_users_this_week ?? 0)],
+      ["Active Listings", String(analytics?.total_active_listings ?? 0)],
+      ["Total Messages", String(analytics?.total_messages_sent ?? 0)],
+      ["Total Reviews", String(analytics?.total_reviews_submitted ?? 0)],
+      ["Avg Rating", analytics?.platform_avg_rating != null ? Number(analytics.platform_avg_rating).toFixed(1) : "0.0"],
       ...(fromDate ? [["From Date", fromDate]] : []),
       ...(toDate ? [["To Date", toDate]] : []),
       [],
       ["Category", "Listings"],
-      ...MOCK_ANALYTICS.listings_by_category.map((c) => [c.category, c.count.toString()]),
+      ...categoryChartData.map((c: any) => [c.category, String(c.count)]),
       [],
       ["Date", "Active Users", "Searches", "Messages"],
-      ...dailyData.map((d) => [d.date, d.users.toString(), d.searches.toString(), d.messages.toString()]),
+      ...dailyData.map((d) => [d.date, String(d.users), String(d.searches), String(d.messages)]),
     ];
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
