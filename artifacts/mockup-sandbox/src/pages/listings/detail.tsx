@@ -298,10 +298,10 @@ export default function ListingDetailPage() {
           {/* Reviews */}
           <Card className="border-primary/5">
             <CardHeader>
-              <CardTitle>Reviews ({listingReviews.length})</CardTitle>
+              <CardTitle>Reviews ({reviews.length})</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {listingReviews.length === 0 ? (
+              {reviews.length === 0 ? (
                 <CartoonEmpty
                   variant="star"
                   title="No reviews yet"
@@ -313,7 +313,7 @@ export default function ListingDetailPage() {
                   ) : undefined}
                 />
               ) : (
-                listingReviews.map((review, idx) => {
+                reviews.map((review, idx) => {
                   const isMyReview = currentUserId === review.reviewer.id;
                   return (
                     <div key={review.id}>
@@ -373,7 +373,7 @@ export default function ListingDetailPage() {
                 })
               )}
 
-              {!isOwner && listingReviews.length > 0 && (
+              {!isOwner && reviews.length > 0 && (
                 <div className="pt-4">
                   <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
                     <DialogTrigger asChild>
