@@ -445,12 +445,12 @@ export default function ListingDetailPage() {
                 </div>
               </div>
               <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link to={`/profile/${listing.owner_id}`}>View Profile</Link>
+                <Link to={`/profile/${listing.owner.id}`}>View Profile</Link>
               </Button>
               {!isOwner && (
                 <ReportDialog
                   targetType="user"
-                  targetId={listing.owner_id}
+                  targetId={listing.owner.id}
                   targetLabel={`User: ${listing.owner.full_name}`}
                   trigger={
                     <Button variant="ghost" size="sm" className="w-full gap-1.5 text-xs text-muted-foreground">
