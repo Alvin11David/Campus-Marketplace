@@ -84,7 +84,7 @@ export default function Dashboard() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      apiGet<any>("/listings?page=0&size=6").then((data) => {
+      apiGet<any>("/listings?page=0&pageSize=6").then((data) => {
         if (!cancelled) {
           setActiveCount(data.count ?? 0);
           setRecommended((data.results ?? []).map(mapListing));

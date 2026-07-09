@@ -81,7 +81,7 @@ export default function ListingDetailPage() {
 
   useEffect(() => {
     if (!listing) return;
-    apiGet<any>("/listings?categoryId=" + listing.category_id + "&page=0&size=3")
+    apiGet<any>("/listings?categoryId=" + listing.category_id + "&page=0&pageSize=3")
       .then((data) => {
         const list = (data.results ?? []).map(mapListing).filter((l: any) => l.id !== listing.id);
         setRelatedListings(list);
