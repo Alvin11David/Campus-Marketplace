@@ -34,10 +34,20 @@ export function Navbar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  if (!user) return null;
+  const [totalUnread, setTotalUnread] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  const totalUnread = MOCK_CONVERSATIONS.reduce((sum, c) => sum + c.unread_count, 0);
-  const unreadNotifications = MOCK_NOTIFICATIONS.filter((n) => !n.is_read).length;
+  useEffect(() => {
+    if (!user) return;
+    apiGet<any[]>("/conversations")
+      .then((list) => setTotalUnread(list.reduce((sum: number, c: any) => sum + c.unreadCount, 0)))
+      .catch(() => {});
+    apiGet<number>("/notifications/unread-count")
+      .then(setUnreadNotifications)
+      .catch(() => {});
+  }, [user]);
+
+  if (!user) return null;
 
   const initials = user?.full_name
     ?.split(" ")
