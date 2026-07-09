@@ -40,10 +40,9 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import type { Message } from "@/lib/api";
+import { apiGet, apiPost, mapConversation, mapMessage, type Conversation, type Message } from "@/lib/api";
 
 // ── Emoji data ──────────────────────────────────────────────
 interface EmojiCategory {

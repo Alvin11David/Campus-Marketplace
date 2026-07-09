@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
@@ -18,10 +18,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MOCK_CONVERSATIONS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { Conversation } from "@/lib/api";
+import { apiGet, apiPost, mapConversation, type Conversation } from "@/lib/api";
 
 function getInitials(name: string) {
   return name
@@ -35,7 +34,8 @@ function getInitials(name: string) {
 export default function MessagesPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [conversations, setConversations] = useState<Conversation[]>(MOCK_CONVERSATIONS as Conversation[]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const filtered = useMemo(
     () =>
@@ -45,6 +45,14 @@ export default function MessagesPage() {
       ),
     [search, conversations]
   );
+
+  useEffect(() => {
+    setLoading(true);
+    apiGet<any[]>("/conversations")
+      .then((data) => setConversations(data.map(mapConversation)))
+      .catch((e) => toast.error(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleDelete = (conv: Conversation) => {
     setConversations((prev) => prev.filter((c) => c.id !== conv.id));
@@ -61,13 +69,17 @@ export default function MessagesPage() {
   };
 
   const handleToggleRead = (conv: Conversation) => {
+    const wasUnread = conv.unread_count > 0;
     setConversations((prev) =>
       prev.map((c) =>
         c.id === conv.id
-          ? { ...c, unread_count: c.unread_count > 0 ? 0 : 1 }
+          ? { ...c, unread_count: wasUnread ? 0 : 1 }
           : c
       )
     );
+    if (wasUnread) {
+      apiPost(`/conversations/${conv.id}/mark-read`, {}).catch(() => {});
+    }
   };
 
   const handleArchive = (conv: Conversation) => {
@@ -98,7 +110,12 @@ export default function MessagesPage() {
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="ml-3 text-sm text-muted-foreground">Loading conversations...</span>
+          </div>
+        ) : filtered.length === 0 ? (
           search ? (
             <CartoonEmpty
               variant="search"
