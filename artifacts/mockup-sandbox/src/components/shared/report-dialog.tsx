@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { apiPost } from "@/lib/api";
 
 const REPORT_REASONS: Record<string, string[]> = {
   listing: ["misleading", "inappropriate", "spam", "duplicate", "rule_violation"],
