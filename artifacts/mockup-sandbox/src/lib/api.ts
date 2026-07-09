@@ -287,9 +287,25 @@ export interface Report {
   description: string;
   status: string;
   reporter: { id: number; full_name: string };
-  target_user: { id: number; full_name: string } | null;
-  target_listing: { id: number; title: string } | null;
+  target_type: string;
+  target_id: number;
   created_at: string;
+}
+
+export function mapReport(data: any): Report {
+  return {
+    id: data.id,
+    reason: data.reason,
+    description: data.description ?? "",
+    status: data.status,
+    reporter: {
+      id: data.reporter.id,
+      full_name: data.reporter.fullName ?? data.reporter.full_name,
+    },
+    target_type: data.targetType,
+    target_id: data.targetId,
+    created_at: data.createdAt,
+  };
 }
 
 export const CAMPUS_LOCATIONS = [
