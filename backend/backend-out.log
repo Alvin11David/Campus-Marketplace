@@ -68,3 +68,6 @@
 2026-07-09T14:52:24.111+03:00  INFO 19824 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
 2026-07-09T14:52:24.119+03:00  INFO 19824 --- [           main] c.c.CampusMarketplaceApplication         : Started CampusMarketplaceApplication in 8.004 seconds (process running for 8.315)
 2026-07-09T14:52:24.180+03:00  INFO 19824 --- [           main] c.campusmarketplace.config.DataSeeder    : Database already seeded, skipping.
+2026-07-09T15:39:25.775+03:00  INFO 19824 --- [nio-8080-exec-3] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-09T15:39:25.775+03:00  INFO 19824 --- [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-09T15:39:25.775+03:00  INFO 19824 --- [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
