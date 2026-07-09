@@ -1,19 +1,17 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:campusmarketplace
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+    url: jdbc:postgresql://localhost:5432/campusmarketplace
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: Alvin11David
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   jackson:
     serialization:
       write-dates-as-timestamps: false
