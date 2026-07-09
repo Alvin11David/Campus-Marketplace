@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Flag, ChevronDown, ChevronUp, XCircle, Ban, MessageSquare, CheckCircle2,
@@ -14,7 +14,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose,
 } from "@/components/ui/dialog";
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
-import { MOCK_REPORTS } from "@/lib/mock-data";
+import { apiGet, apiPost, mapReport } from "@/lib/api";
 import type { Report } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -56,33 +56,51 @@ export default function AdminReports() {
   const [resolutionNotes, setResolutionNotes] = useState<Record<number, string>>({});
   const [actionTarget, setActionTarget] = useState<ActionState | null>(null);
   const [actionTab, setActionTab] = useState("all");
-  const [reports, setReports] = useState(MOCK_REPORTS);
+  const [reports, setReports] = useState<Report[]>([]);
+
+  useEffect(() => {
+    apiGet<any>(`/admin/reports?page=0&pageSize=50`)
+      .then((data) => setReports((data.content ?? []).map(mapReport)))
+      .catch(() => {});
+  }, []);
 
   const filteredReports = reports.filter((r) => {
     if (actionTab === "all") return true;
     return r.status === actionTab;
   });
 
-  function handleAction() {
+  async function handleAction() {
     if (!actionTarget) return;
     const { report, action, notes } = actionTarget;
-    setReports((prev) =>
-      prev.map((r) =>
-        r.id === report.id
-          ? { ...r, status: (action === "dismiss" ? "dismissed" : "resolved") as Report["status"] }
-          : r
-      )
-    );
-    if (notes.trim()) {
-      setResolutionNotes((prev) => ({ ...prev, [report.id]: notes }));
+    try {
+      const linkedAction = action !== "dismiss"
+        ? { type: action === "deactivate_listing" ? "deactivate_listing" : "suspend_user", target_id: report.target_id }
+        : undefined;
+      await apiPost(`/admin/reports/${report.id}/resolve`, {
+        resolution: action === "dismiss" ? "dismissed" : "resolved",
+        resolution_notes: notes,
+        linked_action: linkedAction,
+      });
+      setReports((prev) =>
+        prev.map((r) =>
+          r.id === report.id
+            ? { ...r, status: action === "dismiss" ? "dismissed" : "resolved" }
+            : r
+        )
+      );
+      if (notes.trim()) {
+        setResolutionNotes((prev) => ({ ...prev, [report.id]: notes }));
+      }
+      const actionLabels: Record<ActionType, string> = {
+        dismiss: "dismissed",
+        deactivate_listing: "resolved (listing deactivated)",
+        suspend_user: "resolved (user suspended)",
+      };
+      toast.success(`Report ${actionLabels[action]}`);
+    } catch {
+      toast.error("Failed to resolve report");
     }
     setActionTarget(null);
-    const actionLabels: Record<ActionType, string> = {
-      dismiss: "dismissed",
-      deactivate_listing: "resolved (listing deactivated)",
-      suspend_user: "resolved (user suspended)",
-    };
-    toast.success(`Report ${actionLabels[action]}`);
   }
 
   return (
@@ -135,7 +153,7 @@ export default function AdminReports() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0 space-y-3">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <Badge className={targetTypeStyles[report.target_type]}>
+                                <Badge className={targetTypeStyles[report.target_type] ?? ""}>
                                   {report.target_type.charAt(0).toUpperCase() + report.target_type.slice(1)}
                                 </Badge>
                                 <Badge className={reasonStyles[report.reason] || reasonStyles.other}>
@@ -152,7 +170,7 @@ export default function AdminReports() {
                               )}
                               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                 <span>
-                                  Reported by {reporterNames[report.reporter_id] || `User #${report.reporter_id}`}
+                                  Reported by {report.reporter.full_name}
                                 </span>
                                 <span>{new Date(report.created_at).toLocaleDateString()}</span>
                               </div>
