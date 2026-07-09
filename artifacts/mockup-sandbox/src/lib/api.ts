@@ -95,18 +95,78 @@ export interface Listing {
   price: number;
   price_unit: "flat" | "hourly" | "negotiable";
   listing_type: "service" | "product";
-  status: "active" | "sold" | "closed";
-  condition: "new" | "like-new" | "good" | "fair" | "not-applicable";
+  status: string;
+  condition: string;
   location_details: string | null;
   view_count: number;
+  message_count: number;
+  primary_image_url: string | null;
+  currency: string;
+  stock_quantity: number | null;
   owner: ListingOwner;
   images: ListingImage[];
   category_id: number;
   category_name: string;
+  category: { id: number; name: string };
   campus_location_id: number;
   campus_location_name: string;
+  campus_location: { id: number; name: string };
   created_at: string;
   updated_at: string;
+}
+
+export function mapListing(data: any): Listing {
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    description: data.description ?? "",
+    price: Number(data.price),
+    price_unit: "flat",
+    listing_type: data.listingType,
+    status: data.status,
+    condition: "not-applicable",
+    location_details: null,
+    view_count: data.viewCount ?? 0,
+    message_count: data.messageCount ?? 0,
+    primary_image_url: data.primaryImageUrl ?? null,
+    currency: data.currency ?? "UGX",
+    stock_quantity: data.stockQuantity ?? null,
+    owner: {
+      id: data.owner.id,
+      full_name: data.owner.fullName,
+      profile_photo_url: data.owner.profilePhotoUrl ?? null,
+      avg_rating: data.owner.avgRating ?? null,
+      rating_count: data.owner.ratingCount ?? 0,
+      is_verified: false,
+    },
+    images: (data.images ?? []).map((img: any) => ({
+      id: img.id,
+      image_url: img.imageUrl,
+      sort_order: img.sortOrder,
+    })),
+    category_id: data.category.id,
+    category_name: data.category.name,
+    category: { id: data.category.id, name: data.category.name },
+    campus_location_id: data.campusLocation.id,
+    campus_location_name: data.campusLocation.name,
+    campus_location: { id: data.campusLocation.id, name: data.campusLocation.name },
+    created_at: data.createdAt,
+    updated_at: data.createdAt,
+  };
+}
+
+export function mapCategory(data: any): Category {
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    listing_type_hint: data.listingTypeHint ?? "both",
+    icon_name: data.iconName ?? "Package",
+    description: data.description ?? null,
+    is_active: data.active ?? true,
+    active_listing_count: 0,
+  };
 }
 
 export interface Conversation {
