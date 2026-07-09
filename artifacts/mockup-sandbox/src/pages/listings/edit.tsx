@@ -33,29 +33,62 @@ export default function EditListingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const existing = MOCK_LISTINGS.find((l) => l.id === Number(id));
-
-  const [listingType, setListingType] = useState<"service" | "product">(
-    existing?.listing_type || "service"
-  );
-  const [title, setTitle] = useState(existing?.title || "");
-  const [description, setDescription] = useState(existing?.description || "");
-  const [price, setPrice] = useState(existing?.price || "");
-  const [categoryId, setCategoryId] = useState(existing?.category.id.toString() || "");
-  const [campusLocationId, setCampusLocationId] = useState(
-    existing?.campus_location_id.toString() || ""
-  );
-  const [stockQuantity, setStockQuantity] = useState(
-    existing?.stock_quantity?.toString() || ""
-  );
-  const [images, setImages] = useState<string[]>(
-    existing?.images ? existing.images.map((img) => img.image_url) : []
-  );
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [listingType, setListingType] = useState<"service" | "product">("service");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [campusLocationId, setCampusLocationId] = useState("");
+  const [stockQuantity, setStockQuantity] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
 
-  if (!existing) {
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+
+    Promise.all([
+      apiGet<any>(`/listings/${id}`).then(mapListing),
+      apiGet<any[]>("/categories").then((data) => (data ?? []).map(mapCategory)),
+    ])
+      .then(([listingData, cats]) => {
+        if (user && listingData.owner.id !== user.id) {
+          setForbidden(true);
+          return;
+        }
+        setListing(listingData);
+        setCategories(cats);
+        setListingType(listingData.listing_type);
+        setTitle(listingData.title);
+        setDescription(listingData.description);
+        setPrice(String(listingData.price));
+        setCategoryId(String(listingData.category_id));
+        setCampusLocationId(String(listingData.campus_location_id));
+        setStockQuantity(listingData.stock_quantity != null ? String(listingData.stock_quantity) : "");
+        setImages(listingData.images.map((img: any) => img.image_url));
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [id, user]);
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-32 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (notFound || !listing) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-2">Listing Not Found</h1>
@@ -65,7 +98,7 @@ export default function EditListingPage() {
     );
   }
 
-  if (user?.id !== existing.owner_id) {
+  if (forbidden) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
@@ -75,7 +108,7 @@ export default function EditListingPage() {
     );
   }
 
-  const filteredCategories: Category[] = MOCK_CATEGORIES.filter((c) => {
+  const filteredCategories: Category[] = categories.filter((c) => {
     if (listingType === "service") return c.listing_type_hint === "service" || c.listing_type_hint === "both";
     return c.listing_type_hint === "product" || c.listing_type_hint === "both";
   });
@@ -97,19 +130,37 @@ export default function EditListingPage() {
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSaving(false);
-    toast.success("Listing updated");
-    navigate(`/listings/${id}`);
+    try {
+      await apiPatch(`/listings/${id}`, {
+        title,
+        description,
+        price: Number(price),
+        currency: "UGX",
+        stockQuantity: listingType === "product" ? Number(stockQuantity) : null,
+        categoryId: Number(categoryId),
+        campusLocationId: Number(campusLocationId),
+      });
+      toast.success("Listing updated");
+      navigate(`/listings/${id}`);
+    } catch {
+      toast.error("Failed to update listing");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async () => {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setSaving(false);
-    setDeleteDialogOpen(false);
-    toast.success("Listing deleted");
-    navigate("/my-listings");
+    try {
+      await apiDelete(`/listings/${id}`);
+      setDeleteDialogOpen(false);
+      toast.success("Listing deleted");
+      navigate("/my-listings");
+    } catch {
+      toast.error("Failed to delete listing");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleImageSelect = () => {
@@ -330,7 +381,7 @@ export default function EditListingPage() {
               <DialogHeader>
                 <DialogTitle>Delete Listing</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete "{existing.title}"? This action cannot be undone.
+                  Are you sure you want to delete "{title}"? This action cannot be undone.
                   All reviews associated with this listing will also be removed.
                 </DialogDescription>
               </DialogHeader>
