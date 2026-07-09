@@ -2,6 +2,7 @@ C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\Cam
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\Category.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\CategoryController.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\CategoryRepository.java
+C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\dto\CreateCategoryRequest.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\ApiException.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\BaseEntity.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\ErrorResponse.java
