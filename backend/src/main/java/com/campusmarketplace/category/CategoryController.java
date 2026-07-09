@@ -1,10 +1,15 @@
 package com.campusmarketplace.category;
 
+import com.campusmarketplace.category.dto.CreateCategoryRequest;
 import com.campusmarketplace.common.ApiException;
+import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,5 +36,19 @@ public class CategoryController {
             throw ApiException.notFound("Category not found");
         }
         return ResponseEntity.ok(category);
+    }
+
+    @PostMapping
+    public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
+        String baseSlug = request.name().toLowerCase()
+            .replaceAll("[^a-z0-9\\s-]", "")
+            .replaceAll("\\s+", "-")
+            .replaceAll("-+", "-")
+            .replaceAll("^-|-$", "");
+        String slug = baseSlug + "-" + System.currentTimeMillis();
+
+        var category = new Category(request.name(), slug, request.listingTypeHint(), "Package");
+        category = categoryRepository.save(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 }
