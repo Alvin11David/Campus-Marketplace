@@ -111,24 +111,56 @@ export interface Listing {
 
 export interface Conversation {
   id: number;
-  other_user: {
+  listing_id: number | null;
+  listing_title: string;
+  listing_image_url: string | null;
+  other_participant: {
     id: number;
     full_name: string;
     profile_photo_url: string | null;
   };
-  last_message: {
-    content: string;
-    created_at: string;
-  } | null;
+  last_message_preview: string;
+  last_message_at: string;
   unread_count: number;
-  updated_at: string;
+  created_at: string;
 }
 
 export interface Message {
   id: number;
-  content: string;
+  conversation_id: number;
   sender_id: number;
+  body: string;
+  is_read: boolean;
   created_at: string;
+}
+
+function mapConversation(data: any): Conversation {
+  return {
+    id: data.id,
+    listing_id: data.listing?.id ?? null,
+    listing_title: data.listing?.title ?? "",
+    listing_image_url: null,
+    other_participant: {
+      id: data.otherParticipant.id,
+      full_name: data.otherParticipant.fullName,
+      profile_photo_url: data.otherParticipant.profilePhotoUrl ?? null,
+    },
+    last_message_preview: data.lastMessagePreview ?? "",
+    last_message_at: data.lastMessageAt,
+    unread_count: data.unreadCount,
+    created_at: data.createdAt,
+  };
+}
+
+function mapMessage(data: any): Message {
+  return {
+    id: data.id,
+    conversation_id: data.conversationId ?? 0,
+    sender_id: data.senderId,
+    body: data.content,
+    is_read: data.isRead ?? false,
+    created_at: data.createdAt,
+  };
 }
 
 export interface Notification {
