@@ -10,7 +10,7 @@ import { CartoonEmpty } from "@/components/shared/cartoon-empty";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
 import { ListingCard } from "@/components/shared/listing-card";
 import { FilterDrawer } from "@/components/shared/filter-drawer";
-import { MOCK_LISTINGS } from "@/lib/mock-data";
+import { apiGet, mapListing } from "@/lib/api";
 
 interface Filters {
   minPrice: string;
@@ -33,20 +33,44 @@ export default function SearchPage() {
   const query = searchParams.get("q") || "";
   const [editQuery, setEditQuery] = useState(query);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [searching, setSearching] = useState(true);
+  const [results, setResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     setEditQuery(query);
-    setSearching(true);
-    const timer = setTimeout(() => setSearching(false), 400);
-    return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
     setSearching(true);
-    const timer = setTimeout(() => setSearching(false), 300);
-    return () => clearTimeout(timer);
-  }, [filters]);
+    const params = new URLSearchParams();
+    params.set("q", query);
+    params.set("page", "0");
+    params.set("pageSize", "50");
+    if (filters.sortBy) params.set("sortBy", filters.sortBy);
+    if (filters.minPrice) params.set("minPrice", filters.minPrice);
+    if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+    if (filters.campusLocation && filters.campusLocation !== "all") params.set("campusLocationId", filters.campusLocation);
+    let cancelled = false;
+    apiGet<any>("/listings/search?" + params.toString())
+      .then((data) => {
+        if (cancelled) return;
+        let list = (data.results ?? []).map(mapListing);
+        if (filters.minRating && filters.minRating !== "all") {
+          const minRat = Number.parseFloat(filters.minRating);
+          if (!Number.isNaN(minRat)) {
+            list = list.filter((l: any) => l.owner.avg_rating != null && l.owner.avg_rating >= minRat);
+          }
+        }
+        setResults(list);
+      })
+      .catch(() => { if (!cancelled) setResults([]); })
+      .finally(() => { if (!cancelled) setSearching(false); });
+    return () => { cancelled = true; };
+  }, [query, filters]);
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
@@ -58,57 +82,6 @@ export default function SearchPage() {
     [editQuery, setSearchParams],
   );
 
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
-
-    const q = query.toLowerCase();
-
-    let list = MOCK_LISTINGS.filter(
-      (l) =>
-        l.status === "active" &&
-        (l.title.toLowerCase().includes(q) || l.description.toLowerCase().includes(q)),
-    );
-
-    if (filters.minPrice) {
-      const min = Number.parseFloat(filters.minPrice);
-      if (!Number.isNaN(min)) {
-        list = list.filter((l) => Number.parseFloat(l.price) >= min);
-      }
-    }
-    if (filters.maxPrice) {
-      const max = Number.parseFloat(filters.maxPrice);
-      if (!Number.isNaN(max)) {
-        list = list.filter((l) => Number.parseFloat(l.price) <= max);
-      }
-    }
-    if (filters.campusLocation && filters.campusLocation !== "all") {
-      const locId = Number.parseInt(filters.campusLocation, 10);
-      list = list.filter((l) => l.campus_location_id === locId);
-    }
-    if (filters.minRating && filters.minRating !== "all") {
-      const minRat = Number.parseFloat(filters.minRating);
-      if (!Number.isNaN(minRat)) {
-        list = list.filter((l) => l.avg_rating != null && l.avg_rating >= minRat);
-      }
-    }
-
-    switch (filters.sortBy) {
-      case "price_asc":
-        list.sort((a, b) => Number.parseFloat(a.price) - Number.parseFloat(b.price));
-        break;
-      case "price_desc":
-        list.sort((a, b) => Number.parseFloat(b.price) - Number.parseFloat(a.price));
-        break;
-      case "rating_desc":
-        list.sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0));
-        break;
-      case "newest":
-        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-    }
-
-    return list;
-  }, [query, filters]);
 
   const activeFilterCount = useMemo(
     () =>
