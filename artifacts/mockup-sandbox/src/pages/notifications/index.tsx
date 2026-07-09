@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { apiGet, mapNotification, type Notification } from "@/lib/api";
+import { apiGet, apiPost, mapNotification, type Notification } from "@/lib/api";
 
 const iconMap: Record<string, React.ElementType> = {
   new_message: MessageSquare,
@@ -59,6 +59,7 @@ export default function NotificationsPage() {
 
   const handleMarkAllRead = useCallback(() => {
     setActive((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    apiPost("/notifications/mark-all-read", {}).catch(() => {});
     toast.success("All notifications marked as read");
   }, []);
 
@@ -159,7 +160,12 @@ export default function NotificationsPage() {
           </TabsList>
         </Tabs>
 
-        {currentList.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="ml-3 text-sm text-muted-foreground">Loading notifications...</span>
+          </div>
+        ) : currentList.length === 0 ? (
           view === "active" ? (
             <CartoonEmpty
               variant="bell"
