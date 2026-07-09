@@ -1,23 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ImagePlus, X, Save, Trash2, AlertTriangle } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
 import { toast } from "sonner";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_CATEGORIES, MOCK_LISTINGS } from "@/lib/mock-data";
-import { CAMPUS_LOCATIONS } from "@/lib/api";
-import type { Category } from "@/lib/api";
+import { apiGet, apiPatch, apiDelete, mapCategory, mapListing, CAMPUS_LOCATIONS } from "@/lib/api";
+import type { Category, Listing } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 interface FormErrors {
