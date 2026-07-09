@@ -5,7 +5,6 @@ import { Printer, Wrench, BookOpen, Scissors, Sparkles, Package } from "lucide-r
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
 import { BackButton } from "@/components/shared/back-button";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ListingCard } from "@/components/shared/listing-card";
