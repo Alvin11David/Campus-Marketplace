@@ -34,6 +34,7 @@ com\campusmarketplace\notification\NotificationRepository.class
 com\campusmarketplace\user\dto\UserProfileResponse$LocationInfo.class
 com\campusmarketplace\user\dto\UpdateProfileRequest.class
 com\campusmarketplace\common\PageResponse.class
+com\campusmarketplace\category\dto\CreateCategoryRequest.class
 com\campusmarketplace\notification\Notification.class
 com\campusmarketplace\listing\ListingViewRepository.class
 com\campusmarketplace\moderation\ReportRepository.class
