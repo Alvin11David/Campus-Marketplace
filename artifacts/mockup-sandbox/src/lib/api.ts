@@ -134,7 +134,7 @@ export interface Message {
   created_at: string;
 }
 
-function mapConversation(data: any): Conversation {
+export function mapConversation(data: any): Conversation {
   return {
     id: data.id,
     listing_id: data.listing?.id ?? null,
@@ -152,7 +152,7 @@ function mapConversation(data: any): Conversation {
   };
 }
 
-function mapMessage(data: any): Message {
+export function mapMessage(data: any): Message {
   return {
     id: data.id,
     conversation_id: data.conversationId ?? 0,
