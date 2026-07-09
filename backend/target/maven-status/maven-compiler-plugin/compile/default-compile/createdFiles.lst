@@ -71,6 +71,7 @@ com\campusmarketplace\review\Review.class
 com\campusmarketplace\user\dto\RefreshTokenRequest.class
 com\campusmarketplace\user\UserRepository.class
 com\campusmarketplace\location\CampusLocation.class
+com\campusmarketplace\user\dto\VerifyOtpRequest.class
 com\campusmarketplace\messaging\MessagingController.class
 com\campusmarketplace\messaging\dto\ConversationResponse.class
 com\campusmarketplace\review\ReviewService.class

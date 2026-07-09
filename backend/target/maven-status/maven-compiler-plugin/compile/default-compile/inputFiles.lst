@@ -76,6 +76,7 @@ C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\use
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\dto\RoleToggleRequest.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\dto\UpdateProfileRequest.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\dto\UserProfileResponse.java
+C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\dto\VerifyOtpRequest.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\PasswordResetToken.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\PasswordResetTokenRepository.java
 C:\Users\User\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\user\User.java
