@@ -15,9 +15,8 @@ import { StarRating } from "@/components/shared/star-rating";
 import { ReportDialog } from "@/components/shared/report-dialog";
 import { ListingCard } from "@/components/shared/listing-card";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
-import { MOCK_LISTINGS, MOCK_REVIEWS } from "@/lib/mock-data";
-import { apiGet } from "@/lib/api";
-import type { User, Review } from "@/lib/api";
+import { apiGet, mapListing, mapReview } from "@/lib/api";
+import type { User, Review, Listing } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 function getInitials(name: string) {
@@ -41,34 +40,44 @@ export default function PublicProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    apiGet<Record<string, unknown>>(`/users/${id}`)
-      .then((data) => {
-        const mapped: User = {
-          id: data.id as number,
-          full_name: data.fullName as string,
-          email: "",
-          phone: "",
-          bio: (data.bio as string) ?? null,
-          profile_photo_url: (data.profilePhotoUrl as string) ?? null,
-          campus_location_id: (data.campusLocation as Record<string, unknown>)?.id as number ?? null,
-          campus_location_name: (data.campusLocation as Record<string, unknown>)?.name as string ?? null,
-          is_provider: data.isProvider as boolean,
-          is_seller: data.isSeller as boolean,
-          is_admin: false,
-          is_verified: data.isVerified as boolean,
-          is_active: true,
-          is_suspended: false,
-          avg_rating: (data.avgRating as number) ?? null,
-          rating_count: (data.ratingCount as number) ?? 0,
-          created_at: "",
-        };
-        setProfileUser(mapped);
+
+    Promise.all([
+      apiGet<Record<string, unknown>>(`/users/${id}`).then((data) => ({
+        id: data.id as number,
+        full_name: data.fullName as string,
+        email: "",
+        phone: "",
+        bio: (data.bio as string) ?? null,
+        profile_photo_url: (data.profilePhotoUrl as string) ?? null,
+        campus_location_id: (data.campusLocation as Record<string, unknown>)?.id as number ?? null,
+        campus_location_name: (data.campusLocation as Record<string, unknown>)?.name as string ?? null,
+        is_provider: data.isProvider as boolean,
+        is_seller: data.isSeller as boolean,
+        is_admin: false,
+        is_verified: data.isVerified as boolean,
+        is_active: true,
+        is_suspended: false,
+        avg_rating: (data.avgRating as number) ?? null,
+        rating_count: (data.ratingCount as number) ?? 0,
+        created_at: "",
+      })),
+      apiGet<any[]>(`/users/${id}/listings`).then((data) => (data ?? []).map(mapListing)),
+      apiGet<any>(`/users/${id}/reviews?page=0&pageSize=50`).then((data) =>
+        ((data as any)?.content ?? []).map(mapReview)
+      ),
+    ])
+      .then(([user, listingsData, reviewsData]) => {
+        setProfileUser(user);
+        setListings(listingsData);
+        setReviews(reviewsData);
       })
       .catch(() => setError("User not found"))
       .finally(() => setLoading(false));
@@ -96,19 +105,11 @@ export default function PublicProfilePage() {
   const campusName = profileUser.campus_location_name;
   const initials = getInitials(profileUser.full_name);
 
-  const userListings = MOCK_LISTINGS.filter(
-    (l) => l.owner_id === profileUser.id && l.status === "active"
-  );
+  const activeListings = listings.filter((l) => l.status === "active");
+  const serviceListings = activeListings.filter((l) => l.listing_type === "service");
+  const productListings = activeListings.filter((l) => l.listing_type === "product");
 
-  const serviceListings = userListings.filter((l) => l.listing_type === "service");
-  const productListings = userListings.filter((l) => l.listing_type === "product");
-
-  const userListingIds = userListings.map((l) => l.id);
-  const userReviews: Review[] = MOCK_REVIEWS.filter((r) =>
-    userListingIds.includes(r.listing_id)
-  );
-
-  const hasContent = userListings.length > 0 || userReviews.length > 0;
+  const hasContent = activeListings.length > 0 || reviews.length > 0;
 
   return (
     <motion.div
@@ -179,7 +180,7 @@ export default function PublicProfilePage() {
       </Card>
 
       {/* Listings */}
-      {userListings.length > 0 ? (
+      {activeListings.length > 0 ? (
         <Tabs defaultValue={serviceListings.length > 0 ? "services" : "products"}>
           <TabsList className="w-full sm:w-auto">
             {serviceListings.length > 0 && (
@@ -225,7 +226,7 @@ export default function PublicProfilePage() {
       )}
 
       {/* Reviews */}
-      {userReviews.length > 0 ? (
+      {reviews.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
