@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, MessageSquare, Star, ChevronLeft, ChevronRight, Send, ShoppingBag, Wrench, ArrowRight, Pencil, Trash2, Flag, BadgeCheck } from "lucide-react";
@@ -9,14 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { StarRating } from "@/components/shared/star-rating";
 import { ReportDialog } from "@/components/shared/report-dialog";
 import { ListingCard } from "@/components/shared/listing-card";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_LISTINGS, MOCK_REVIEWS, MOCK_CONVERSATIONS } from "@/lib/mock-data";
-import type { Review } from "@/lib/api";
+import { apiGet, apiPost, apiPatch, apiDelete, mapListing, mapReview, type Review } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 

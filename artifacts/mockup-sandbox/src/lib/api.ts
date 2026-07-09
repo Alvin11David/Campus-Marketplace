@@ -249,6 +249,7 @@ export function mapNotification(data: any): Notification {
 
 export interface Review {
   id: number;
+  listing_id: number;
   rating: number;
   comment: string;
   reviewer: {
@@ -257,6 +258,21 @@ export interface Review {
     profile_photo_url: string | null;
   };
   created_at: string;
+}
+
+export function mapReview(data: any): Review {
+  return {
+    id: data.id,
+    listing_id: data.listingId,
+    rating: data.rating,
+    comment: data.comment ?? "",
+    reviewer: {
+      id: data.reviewer.id,
+      full_name: data.reviewer.fullName,
+      profile_photo_url: data.reviewer.profilePhotoUrl ?? null,
+    },
+    created_at: data.createdAt,
+  };
 }
 
 export interface Report {
