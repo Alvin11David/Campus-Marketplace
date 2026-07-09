@@ -22,6 +22,7 @@ com\campusmarketplace\email\EmailService.class
 com\campusmarketplace\common\GlobalExceptionHandler.class
 com\campusmarketplace\messaging\MessageRepository.class
 com\campusmarketplace\listing\ListingView.class
+com\campusmarketplace\listing\CategoryListingCount.class
 com\campusmarketplace\recommendation\RecommendationService.class
 com\campusmarketplace\user\dto\MessageResponse.class
 com\campusmarketplace\listing\SearchLog.class

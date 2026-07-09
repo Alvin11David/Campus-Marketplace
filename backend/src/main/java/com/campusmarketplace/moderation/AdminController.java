@@ -1,8 +1,10 @@
 package com.campusmarketplace.moderation;
 
+import com.campusmarketplace.category.CategoryRepository;
 import com.campusmarketplace.common.ApiException;
 import com.campusmarketplace.listing.ListingRepository;
 import com.campusmarketplace.listing.dto.ListingResponse;
+import com.campusmarketplace.messaging.MessageRepository;
 import com.campusmarketplace.notification.NotificationRepository;
 import com.campusmarketplace.review.ReviewRepository;
 import com.campusmarketplace.user.UserRepository;
@@ -37,11 +39,14 @@ public class AdminController {
     private final ReportRepository reportRepository;
     private final NotificationRepository notificationRepository;
     private final com.campusmarketplace.listing.ListingImageRepository listingImageRepository;
+    private final MessageRepository messageRepository;
+    private final CategoryRepository categoryRepository;
 
     public AdminController(ModerationService moderationService, UserRepository userRepository,
                            ListingRepository listingRepository, ReviewRepository reviewRepository,
                            ReportRepository reportRepository, NotificationRepository notificationRepository,
-                           com.campusmarketplace.listing.ListingImageRepository listingImageRepository) {
+                           com.campusmarketplace.listing.ListingImageRepository listingImageRepository,
+                           MessageRepository messageRepository, CategoryRepository categoryRepository) {
         this.moderationService = moderationService;
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
@@ -49,6 +54,8 @@ public class AdminController {
         this.reportRepository = reportRepository;
         this.notificationRepository = notificationRepository;
         this.listingImageRepository = listingImageRepository;
+        this.messageRepository = messageRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @GetMapping("/users")
@@ -130,13 +137,20 @@ public class AdminController {
         var overview = new HashMap<String, Object>();
         overview.put("total_users", userRepository.count());
         overview.put("total_active_listings", listingRepository.countActive());
-        overview.put("total_messages_sent", 0L);
-        overview.put("total_reviews_submitted", 0L);
+        overview.put("total_messages_sent", messageRepository.countAll());
+        overview.put("total_reviews_submitted", reviewRepository.countActiveReviews());
 
+        var categoryCounts = listingRepository.countActiveListingsByCategory();
         var listingsByCategory = new java.util.ArrayList<Map<String, Object>>();
-        var categories = com.campusmarketplace.category.CategoryRepository.class;
+        for (var cc : categoryCounts) {
+            var entry = new HashMap<String, Object>();
+            entry.put("category_id", cc.getCategoryId());
+            entry.put("category_name", cc.getCategoryName());
+            entry.put("listing_count", cc.getListingCount());
+            listingsByCategory.add(entry);
+        }
         overview.put("listings_by_category", listingsByCategory);
-        overview.put("platform_avg_rating", 0.0);
+        overview.put("platform_avg_rating", reviewRepository.getPlatformAverageRating());
 
         return ResponseEntity.ok(overview);
     }

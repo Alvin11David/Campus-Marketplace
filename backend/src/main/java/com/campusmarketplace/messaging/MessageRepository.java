@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
+    @Query("SELECT COUNT(m) FROM Message m")
+    long countAll();
+
     List<Message> findByConversationIdOrderByCreatedAtAsc(Long conversationId);
 
     @Query("SELECT COUNT(m) FROM Message m WHERE m.conversation.id = :conversationId AND m.sender.id != :userId AND m.isRead = false")

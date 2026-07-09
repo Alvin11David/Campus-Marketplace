@@ -58,6 +58,14 @@ public class Conversation {
         updatedAt = Instant.now();
     }
 
+    public Conversation() {}
+
+    public Conversation(Listing listing, User initiator, User recipient) {
+        this.listing = listing;
+        this.initiator = initiator;
+        this.recipient = recipient;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Listing getListing() { return listing; }

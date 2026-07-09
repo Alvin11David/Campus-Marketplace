@@ -63,6 +63,9 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
     @Query("SELECT COUNT(l) FROM Listing l WHERE l.status = 'active'")
     long countActive();
 
+    @Query("SELECT l.category.id AS categoryId, l.category.name AS categoryName, COUNT(l) AS listingCount FROM Listing l WHERE l.status = 'active' GROUP BY l.category.id, l.category.name ORDER BY l.category.name")
+    List<CategoryListingCount> countActiveListingsByCategory();
+
     @jakarta.transaction.Transactional
     @Modifying
     @Query("UPDATE Listing l SET l.viewCount = l.viewCount + 1 WHERE l.id = :id")
