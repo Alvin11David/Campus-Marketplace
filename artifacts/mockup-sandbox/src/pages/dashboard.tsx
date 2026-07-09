@@ -12,8 +12,7 @@ import { StarRating } from "@/components/shared/star-rating";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
-import { MOCK_LISTINGS, MOCK_CATEGORIES, MOCK_CONVERSATIONS, MOCK_NOTIFICATIONS, MOCK_REVIEWS } from "@/lib/mock-data";
-import type { Category } from "@/lib/api";
+import { apiGet, mapListing, mapCategory, type Category } from "@/lib/api";
 
 const categoryIconMap: Record<string, typeof Printer> = {
   Printer, Wrench, BookOpen, Scissors, Sparkles, Package,
@@ -21,7 +20,6 @@ const categoryIconMap: Record<string, typeof Printer> = {
 
 function CategoryTile({ category }: { category: Category }) {
   const IconComponent = categoryIconMap[category.icon_name] || Package;
-  const count = MOCK_LISTINGS.filter((l) => l.category.id === category.id && l.status === "active").length;
 
   return (
     <Link
@@ -32,7 +30,7 @@ function CategoryTile({ category }: { category: Category }) {
         <IconComponent className="h-5 w-5" />
       </div>
       <span className="text-[11px] font-medium leading-tight line-clamp-2 text-foreground/80">{category.name}</span>
-      <span className="text-[10px] text-muted-foreground">{count} listings</span>
+      <span className="text-[10px] text-muted-foreground">{category.active_listing_count} listings</span>
     </Link>
   );
 }
@@ -76,19 +74,42 @@ function DashboardSkeleton() {
 export default function Dashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [activeCount, setActiveCount] = useState(0);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [totalUnread, setTotalUnread] = useState(0);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [recommended, setRecommended] = useState<any[]>([]);
+  const [myListingCount, setMyListingCount] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    Promise.all([
+      apiGet<any>("/listings?page=0&size=6").then((data) => {
+        if (!cancelled) {
+          setActiveCount(data.count ?? 0);
+          setRecommended((data.results ?? []).map(mapListing));
+        }
+      }),
+      apiGet<any[]>("/categories").then((data) => {
+        if (!cancelled) setCategories((data ?? []).map(mapCategory));
+      }),
+      apiGet<any[]>("/conversations").then((data) => {
+        if (!cancelled) setTotalUnread(data.reduce((s: number, c: any) => s + c.unreadCount, 0));
+      }),
+      apiGet<number>("/notifications/unread-count").then((data) => {
+        if (!cancelled) setUnreadNotifs(data);
+      }),
+      apiGet<any[]>("/listings/mine").then((data) => {
+        if (!cancelled) setMyListingCount((data ?? []).length);
+      }),
+    ])
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, []);
 
-  const activeListings = MOCK_LISTINGS.filter((l) => l.status === "active");
-  const recommended = activeListings.slice(0, 6);
-  const totalUnread = MOCK_CONVERSATIONS.reduce((s, c) => s + c.unread_count, 0);
-  const unreadNotifs = MOCK_NOTIFICATIONS.filter((n) => !n.is_read).length;
-  const totalReviews = MOCK_REVIEWS.length;
-
-  const myListingCount = user ? MOCK_LISTINGS.filter((l) => l.owner_id === user.id).length : 0;
   const isNewUser = myListingCount === 0 && totalUnread === 0 && unreadNotifs === 0;
 
   if (loading) return <DashboardSkeleton />;
@@ -156,12 +177,12 @@ export default function Dashboard() {
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Active Listings</span>
-                    <span className="text-lg font-bold text-foreground">{activeListings.length}</span>
+                    <span className="text-lg font-bold text-foreground">{activeCount}</span>
                   </div>
                   <Separator className="bg-border/50" />
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Categories</span>
-                    <span className="text-lg font-bold text-foreground">{MOCK_CATEGORIES.length}</span>
+                    <span className="text-lg font-bold text-foreground">{categories.length}</span>
                   </div>
                   <Separator className="bg-border/50" />
                   <div className="flex items-center justify-between">
@@ -172,8 +193,8 @@ export default function Dashboard() {
                   </div>
                   <Separator className="bg-border/50" />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Reviews</span>
-                    <span className="text-lg font-bold text-foreground">{totalReviews}</span>
+                    <span className="text-sm text-muted-foreground">My Listings</span>
+                    <span className="text-lg font-bold text-foreground">{myListingCount}</span>
                   </div>
                 </div>
               </CardContent>
@@ -198,10 +219,9 @@ export default function Dashboard() {
                 ) : (
                   <div className="space-y-3">
                     {[
-                      { icon: MessageCircle, text: "New message about Math Tutoring", time: "2m ago" },
-                      { text: "Your listing was viewed 15 times", time: "1h ago" },
-                      { text: "New listing in Electronics", time: "3h ago" },
-                      { icon: Star, text: "New 5-star review received", time: "5h ago" },
+                      { icon: MessageCircle, text: "New message about your listing", time: "Recently" },
+                      { text: "Your listing was viewed", time: "" },
+                      { text: "New listings available", time: "" },
                     ].map((item, i) => {
                       const Icon = item.icon;
                       return (
@@ -234,7 +254,7 @@ export default function Dashboard() {
                   <ArrowRight className="h-3.5 w-3.5 ml-auto text-muted-foreground group-hover:text-primary transition-colors" />
                 </Link>
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10">
-                  {MOCK_CATEGORIES.slice(0, 6).map((category) => (
+                  {categories.slice(0, 6).map((category) => (
                     <CategoryTile key={category.id} category={category} />
                   ))}
                 </div>
