@@ -60,6 +60,7 @@ const [categories, setCategories] = useState<Category[]>([]);
     const newErrors: FormErrors = {};
     if (!title.trim()) newErrors.title = "Title is required";
     if (!description.trim()) newErrors.description = "Description is required";
+    else if (description.trim().length < 20) newErrors.description = "Description must be at least 20 characters";
     if (!price.trim() || isNaN(Number(price)) || Number(price) <= 0)
       newErrors.price = "Valid price is required";
     if (!categoryId && !customCategoryName.trim()) newErrors.category_id = "Category is required";
@@ -194,13 +195,18 @@ const [categories, setCategories] = useState<Category[]>([]);
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="description">Description</Label>
+              <span className={cn("text-xs tabular-nums", description.length < 20 ? "text-muted-foreground" : "text-success")}>
+                {description.length} / 20 min
+              </span>
+            </div>
             <Textarea
               id="description"
               rows={5}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what you're offering in detail..."
+              placeholder="Describe what you're offering in detail... (at least 20 characters)"
               className={errors.description ? "border-destructive" : ""}
             />
             {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
