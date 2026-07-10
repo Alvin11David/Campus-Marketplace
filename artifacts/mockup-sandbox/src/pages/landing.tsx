@@ -160,15 +160,15 @@ export default function Landing() {
               >
                 <span className="text-sm font-bold text-primary-foreground">CM</span>
               </motion.div>
-              <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent">CampusMarket</span>
+              <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-amber-500 bg-clip-text text-transparent hidden sm:inline">CampusMarket</span>
             </Link>
           </motion.div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="ghost" size="sm" className="relative overflow-hidden group" asChild>
+              <Button variant="ghost" size="sm" className="relative overflow-hidden group text-xs px-2 sm:px-3" asChild>
                 <Link to="/login">
                   <span className="relative z-10">Log In</span>
-                  <motion.div 
+                  <motion.div
                     className="absolute inset-0 bg-primary/10"
                     initial={{ x: "-100%" }}
                     whileHover={{ x: 0 }}
@@ -178,17 +178,17 @@ export default function Landing() {
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button 
-                size="sm" 
-                className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all" 
+              <Button
+                size="sm"
+                className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all text-xs px-2 sm:px-3"
                 asChild
               >
                 <Link to="/register">
-                  <span className="relative z-10 flex items-center gap-2">
-                    Get Started
+                  <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                    <span className="hidden sm:inline">Get Started</span>
                     <Zap className="h-3 w-3" />
                   </span>
-                  <motion.div 
+                  <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-amber-500 to-indigo-600"
                     initial={{ x: "100%" }}
                     whileHover={{ x: 0 }}
@@ -275,24 +275,24 @@ export default function Landing() {
               </motion.div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
-                  size="lg" 
-                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all relative overflow-hidden group"
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-indigo-600 to-amber-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all relative overflow-hidden group text-sm sm:text-base"
                   asChild
                 >
                   <Link to="/register">
                     <span className="relative z-10 flex items-center gap-2">
                       Get Started
-                      <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
                     </span>
-                    <motion.div 
+                    <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-amber-500 to-indigo-600"
                       initial={{ x: "-100%" }}
                       whileHover={{ x: 0 }}
@@ -302,14 +302,14 @@ export default function Landing() {
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full sm:w-auto gap-2 border-2 border-indigo-500/30 hover:border-indigo-500/50 transition-all bg-indigo-500/5"
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto gap-2 border-2 border-indigo-500/30 hover:border-indigo-500/50 transition-all bg-indigo-500/5 text-sm sm:text-base"
                   asChild
                 >
                   <Link to="/login">
-                    <LogIn className="h-5 w-5" />
+                    <LogIn className="h-4 w-4 sm:h-5 sm:w-5" />
                     Log In
                   </Link>
                 </Button>
