@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { apiGet, apiPost, apiDelete, mapNotification, type Notification } from "@/lib/api";
+import { useUnread } from "@/contexts/unread-context";
 
 const iconMap: Record<string, React.ElementType> = {
   new_message: MessageSquare,
@@ -39,6 +40,7 @@ type ViewTab = "active" | "archived";
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const { refresh: refreshUnread } = useUnread();
   const [active, setActive] = useState<Notification[]>([]);
   const [archived, setArchived] = useState<Notification[]>([]);
   const [view, setView] = useState<ViewTab>("active");
@@ -63,12 +65,12 @@ export default function NotificationsPage() {
 
   const handleMarkAllRead = useCallback(() => {
     setActive((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    apiPost("/notifications/mark-all-read", {}).catch(() => {});
+    apiPost("/notifications/mark-all-read", {}).then(refreshUnread).catch(() => {});
     toast.success("All notifications marked as read");
   }, []);
 
   const handleToggleRead = useCallback((notif: Notification, list: "active" | "archived") => {
-    apiPost("/notifications/" + notif.id + "/mark-read", {}).catch(() => {});
+    apiPost("/notifications/" + notif.id + "/mark-read", {}).then(refreshUnread).catch(() => {});
     const updater = (prev: Notification[]) =>
       prev.map((n) => (n.id === notif.id ? { ...n, is_read: !n.is_read } : n));
     if (list === "active") setActive(updater);
@@ -76,7 +78,7 @@ export default function NotificationsPage() {
   }, []);
 
   const handleDelete = useCallback((notif: Notification, list: "active" | "archived") => {
-    apiDelete("/notifications/" + notif.id).catch(() => {});
+    apiDelete("/notifications/" + notif.id).then(refreshUnread).catch(() => {});
     const updater = (prev: Notification[]) => prev.filter((n) => n.id !== notif.id);
     if (list === "active") setActive(updater);
     else setArchived(updater);
@@ -84,21 +86,21 @@ export default function NotificationsPage() {
   }, []);
 
   const handleArchive = useCallback((notif: Notification) => {
-    apiPost("/notifications/" + notif.id + "/archive", {}).catch(() => {});
+    apiPost("/notifications/" + notif.id + "/archive", {}).then(refreshUnread).catch(() => {});
     setActive((prev) => prev.filter((n) => n.id !== notif.id));
     setArchived((prev) => [...prev, notif]);
     toast.success("Notification archived");
   }, []);
 
   const handleRestore = useCallback((notif: Notification) => {
-    apiPost("/notifications/" + notif.id + "/restore", {}).catch(() => {});
+    apiPost("/notifications/" + notif.id + "/restore", {}).then(refreshUnread).catch(() => {});
     setArchived((prev) => prev.filter((n) => n.id !== notif.id));
     setActive((prev) => [...prev, { ...notif, is_read: true }]);
     toast.success("Notification restored");
   }, []);
 
   const handleRestoreAll = useCallback(() => {
-    archived.forEach((n) => apiPost("/notifications/" + n.id + "/restore", {}).catch(() => {}));
+    archived.forEach((n) => apiPost("/notifications/" + n.id + "/restore", {}).then(refreshUnread).catch(() => {}));
     setActive((prev) => [...prev, ...archived.map((n) => ({ ...n, is_read: true }))]);
     setArchived([]);
     toast.success("All notifications restored");
@@ -110,6 +112,7 @@ export default function NotificationsPage() {
         setActive((prev) =>
           prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n)),
         );
+        refreshUnread();
       }
       if (notif.related_type && notif.related_id != null) {
         if (notif.related_type === "conversation") {

@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { apiGet, apiPost, apiDelete, mapConversation, type Conversation } from "@/lib/api";
+import { useUnread } from "@/contexts/unread-context";
 
 function getInitials(name: string) {
   return name
@@ -33,6 +34,7 @@ function getInitials(name: string) {
 
 export default function MessagesPage() {
   const navigate = useNavigate();
+  const { refresh: refreshUnread } = useUnread();
   const [search, setSearch] = useState("");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,11 +71,11 @@ export default function MessagesPage() {
           : c
       )
     );
-    apiPost(`/conversations/${conv.id}/mark-read`, {}).catch(() => {});
+    apiPost(`/conversations/${conv.id}/mark-read`, {}).then(refreshUnread).catch(() => {});
   };
 
   const handleArchive = (conv: Conversation) => {
-    apiPost("/conversations/" + conv.id + "/archive", {}).catch(() => {});
+    apiPost("/conversations/" + conv.id + "/archive", {}).then(refreshUnread).catch(() => {});
     setConversations((prev) => prev.filter((c) => c.id !== conv.id));
     toast.success("Conversation archived");
   };

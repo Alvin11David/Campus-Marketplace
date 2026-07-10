@@ -13,9 +13,9 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet } from "@/lib/api";
-import { useState, useEffect } from "react";
+import { useUnread } from "@/contexts/unread-context";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 const navLinks = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -30,22 +30,13 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { totalUnread, unreadNotifications, refresh } = useUnread();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const [totalUnread, setTotalUnread] = useState(0);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
-
-  useEffect(() => {
-    if (!user) return;
-    apiGet<any[]>("/conversations")
-      .then((list) => setTotalUnread(list.reduce((sum: number, c: any) => sum + c.unreadCount, 0)))
-      .catch(() => {});
-    apiGet<number>("/notifications/unread-count")
-      .then(setUnreadNotifications)
-      .catch(() => {});
-  }, [user]);
+  useEffect(() => { if (user) refresh(); }, [user]);
 
   if (!user) return null;
 

@@ -4,6 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth-context";
+import { UnreadProvider } from "@/contexts/unread-context";
 import router from "@/router";
 import { registerPWA } from "@/pwa";
 import "./index.css";
@@ -19,8 +20,10 @@ createRoot(document.getElementById("root")!).render(
       disableTransitionOnChange
     >
       <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster />
+        <UnreadProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </UnreadProvider>
       </AuthProvider>
     </ThemeProvider>
   </StrictMode>

@@ -43,6 +43,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { apiGet, apiPost, mapConversation, mapMessage, type Conversation, type Message } from "@/lib/api";
+import { useUnread } from "@/contexts/unread-context";
 
 // ── Emoji data ──────────────────────────────────────────────
 interface EmojiCategory {
@@ -254,6 +255,7 @@ function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
 export default function ConversationPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { refresh: refreshUnread } = useUnread();
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -305,7 +307,7 @@ export default function ConversationPage() {
         if (!cancelled) setConvLoaded(true);
       });
 
-    apiPost("/conversations/" + id + "/mark-read", {}).catch(() => {});
+    apiPost("/conversations/" + id + "/mark-read", {}).then(refreshUnread).catch(() => {});
 
     return () => {
       cancelled = true;
@@ -387,6 +389,7 @@ export default function ConversationPage() {
       setReplyTo(null);
       setIsTyping(false);
       setTimeout(scrollToBottom, 50);
+      refreshUnread();
       toast.success("Message sent");
     } catch (e: any) {
       toast.error(e.message);
