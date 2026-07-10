@@ -55,17 +55,9 @@ export default function MessagesPage() {
   }, []);
 
   const handleDelete = (conv: Conversation) => {
+    apiDelete("/conversations/" + conv.id).catch(() => {});
     setConversations((prev) => prev.filter((c) => c.id !== conv.id));
     toast.success("Conversation deleted");
-  };
-
-  const handleMarkRead = (conv: Conversation) => {
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === conv.id ? { ...c, unread_count: 0 } : c
-      )
-    );
-    toast.success(conv.unread_count > 0 ? "Marked as read" : "Marked as unread");
   };
 
   const handleToggleRead = (conv: Conversation) => {
@@ -77,12 +69,11 @@ export default function MessagesPage() {
           : c
       )
     );
-    if (wasUnread) {
-      apiPost(`/conversations/${conv.id}/mark-read`, {}).catch(() => {});
-    }
+    apiPost(`/conversations/${conv.id}/mark-read`, {}).catch(() => {});
   };
 
   const handleArchive = (conv: Conversation) => {
+    apiDelete("/conversations/" + conv.id).catch(() => {});
     setConversations((prev) => prev.filter((c) => c.id !== conv.id));
     toast.success("Conversation archived");
   };
