@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet, apiPost, apiUpload, mapCategory, fetchLocations } from "@/lib/api";
+import { apiGet, apiPost, mapCategory, fetchLocations } from "@/lib/api";
 import type { Category, CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -88,22 +88,17 @@ const [stockQuantity, setStockQuantity] = useState("");
         setCategories((prev) => [...prev, { ...newCat, icon_name: newCat.iconName ?? "Package", listing_type_hint: newCat.listingTypeHint, is_active: true, active_listing_count: 0 }]);
       }
 
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("listingType", listingType);
-      formData.append("categoryId", String(resolvedCategoryId));
-      formData.append("price", String(price));
-      formData.append("currency", "UGX");
-      formData.append("campusLocationId", String(campusLocationId));
-      if (listingType === "product") {
-        formData.append("stockQuantity", String(stockQuantity));
-      }
-      imageFiles.forEach((file) => {
-        formData.append("images", file);
+      const data = await apiPost<any>("/listings", {
+        title,
+        description,
+        listingType: listingType,
+        categoryId: Number(resolvedCategoryId),
+        price: Number(price),
+        currency: "UGX",
+        stockQuantity: listingType === "product" ? Number(stockQuantity) : null,
+        campusLocationId: Number(campusLocationId),
+        imageUrls: images.length > 0 ? images : undefined,
       });
-
-      const data = await apiUpload<any>("/listings", formData);
       toast.success("Listing published", { description: "Your listing is now live." });
       navigate(`/listings/${data.id}`);
     } catch {

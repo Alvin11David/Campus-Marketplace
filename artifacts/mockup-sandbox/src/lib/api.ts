@@ -83,13 +83,13 @@ export function apiDelete<T>(path: string): Promise<T> {
   return request<T>("DELETE", path);
 }
 
-export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+export async function apiUpload<T>(path: string, formData: FormData, method: string = "POST"): Promise<T> {
   const token = localStorage.getItem("cm_token");
   const headers: Record<string, string> = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
+    method,
     headers,
     body: formData,
   });
