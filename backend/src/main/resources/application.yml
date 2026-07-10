@@ -49,7 +49,9 @@ spring:
       on-profile: dev
   datasource:
     url: jdbc:h2:mem:campusmarketplace
+    driver-class-name: org.h2.Driver
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
 
