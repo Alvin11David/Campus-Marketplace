@@ -73,11 +73,16 @@ export default function MyProfilePage() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const text = await res.text();
+        let msg = "Upload failed";
+        try { const err = JSON.parse(text); if (err.detail?.includes("MaxUpload")) msg = "Photo too large (max 10MB)"; } catch {}
+        throw new Error(msg);
+      }
       await refreshUser();
       toast.success("Photo updated");
-    } catch {
-      toast.error("Failed to upload photo");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload photo");
     } finally {
       setUploadingPhoto(false);
     }
