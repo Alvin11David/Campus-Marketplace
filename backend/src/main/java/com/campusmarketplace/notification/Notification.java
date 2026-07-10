@@ -42,6 +42,9 @@ public class Notification {
     @Column(name = "is_read", nullable = false)
     private boolean isRead;
 
+    @Column(name = "is_archived", nullable = false)
+    private boolean isArchived;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -79,5 +82,7 @@ public class Notification {
     public void setRelatedId(Long relatedId) { this.relatedId = relatedId; }
     public boolean isRead() { return isRead; }
     public void setRead(boolean read) { isRead = read; }
+    public boolean isArchived() { return isArchived; }
+    public void setArchived(boolean archived) { isArchived = archived; }
     public Instant getCreatedAt() { return createdAt; }
 }
