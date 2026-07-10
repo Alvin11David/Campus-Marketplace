@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8080/api/v1";
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? "http://localhost:8080";
+export const API_BASE = `${API_ORIGIN}/api/v1`;
 
 function extractError(body: Record<string, unknown>): string {
   if (body.errors && typeof body.errors === "object") {
@@ -10,6 +11,25 @@ function extractError(body: Record<string, unknown>): string {
   return (body.detail as string) || "Request failed";
 }
 
+async function refreshToken(): Promise<string | null> {
+  const rt = localStorage.getItem("cm_refresh_token");
+  if (!rt) return null;
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: rt }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const newToken: string = data.accessToken ?? data.token;
+    localStorage.setItem("cm_token", newToken);
+    return newToken;
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const token = localStorage.getItem("cm_token");
@@ -19,6 +39,18 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     headers,
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+  if (res.status === 401) {
+    const newToken = await refreshToken();
+    if (newToken) {
+      headers["Authorization"] = `Bearer ${newToken}`;
+      const retry = await fetch(`${API_BASE}${path}`, {
+        method,
+        headers,
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
+      if (retry.ok) return retry.json();
+    }
+  }
   if (!res.ok) {
     const text = await res.text();
     let err: Record<string, unknown>;

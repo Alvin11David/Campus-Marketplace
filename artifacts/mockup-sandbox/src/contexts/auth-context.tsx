@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import type { User } from "@/lib/api";
-import { apiPost, apiGet } from "@/lib/api";
+import { apiPost, apiGet, API_BASE } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -59,7 +59,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(mapped);
         localStorage.setItem("cm_user", JSON.stringify(mapped));
       })
-      .catch(() => {
+      .catch(async () => {
+        const rt = localStorage.getItem("cm_refresh_token");
+        if (rt) {
+          try {
+            const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refreshToken: rt }),
+            });
+            if (refreshRes.ok) {
+              const refreshData = await refreshRes.json();
+              const newToken: string = refreshData.accessToken ?? refreshData.token;
+              localStorage.setItem("cm_token", newToken);
+              const meRes = await fetch(`${API_BASE}/auth/me`, {
+                headers: { Authorization: `Bearer ${newToken}` },
+              });
+              if (meRes.ok) {
+                const meData = await meRes.json();
+                const mapped = mapUser(meData);
+                setUser(mapped);
+                localStorage.setItem("cm_user", JSON.stringify(mapped));
+                setIsLoading(false);
+                return;
+              }
+            }
+          } catch {
+            // refresh failed
+          }
+        }
         localStorage.removeItem("cm_token");
         localStorage.removeItem("cm_refresh_token");
         localStorage.removeItem("cm_user");

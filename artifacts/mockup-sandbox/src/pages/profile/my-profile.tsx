@@ -20,7 +20,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { StarRating } from "@/components/shared/star-rating";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
 import { useAuth } from "@/contexts/auth-context";
-import { apiPatch, apiPost, fetchLocations } from "@/lib/api";
+import { apiPatch, apiPost, fetchLocations, API_BASE } from "@/lib/api";
 import type { CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +68,7 @@ export default function MyProfilePage() {
       const formData = new FormData();
       formData.append("file", file);
       const token = localStorage.getItem("cm_token");
-      const res = await fetch("http://localhost:8080/api/v1/users/me/photo", {
+      const res = await fetch(`${API_BASE}/users/me/photo`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
