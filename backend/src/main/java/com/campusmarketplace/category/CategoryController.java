@@ -43,6 +43,9 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
+        if (categoryRepository.findByName(request.name()).isPresent()) {
+            throw ApiException.conflict("A category with the name '" + request.name() + "' already exists");
+        }
         String baseSlug = request.name().toLowerCase()
             .replaceAll("[^a-z0-9\\s-]", "")
             .replaceAll("\\s+", "-")

@@ -10,6 +10,7 @@ C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\co
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\GlobalExceptionHandler.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\PageResponse.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\config\DataSeeder.java
+C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\config\WebConfig.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\email\EmailService.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\listing\CategoryListingCount.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\listing\dto\CreateListingRequest.java

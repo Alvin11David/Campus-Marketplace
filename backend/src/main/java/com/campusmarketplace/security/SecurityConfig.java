@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/listings/*/reviews").permitAll()
                 .requestMatchers(request -> request.getServletPath().matches("/api/v1/users/\\d+")).permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
