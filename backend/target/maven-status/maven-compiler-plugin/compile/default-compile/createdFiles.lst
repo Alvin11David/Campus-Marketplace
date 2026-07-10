@@ -60,6 +60,7 @@ com\campusmarketplace\listing\CategoryListingCount.class
 com\campusmarketplace\recommendation\RecommendationService.class
 com\campusmarketplace\user\dto\MessageResponse.class
 com\campusmarketplace\user\dto\UserProfileResponse.class
+com\campusmarketplace\category\dto\CategoryWithCount.class
 com\campusmarketplace\user\dto\UserProfileResponse$LocationInfo.class
 com\campusmarketplace\common\PageResponse.class
 com\campusmarketplace\category\dto\CreateCategoryRequest.class

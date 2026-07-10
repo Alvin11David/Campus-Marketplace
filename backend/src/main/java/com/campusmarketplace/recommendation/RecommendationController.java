@@ -1,7 +1,5 @@
 package com.campusmarketplace.recommendation;
 
-import com.campusmarketplace.listing.Listing;
-import com.campusmarketplace.listing.ListingImageRepository;
 import com.campusmarketplace.listing.dto.ListingResponse;
 import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.User;
@@ -17,12 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
-    private final ListingImageRepository listingImageRepository;
 
-    public RecommendationController(RecommendationService recommendationService,
-                                    ListingImageRepository listingImageRepository) {
+    public RecommendationController(RecommendationService recommendationService) {
         this.recommendationService = recommendationService;
-        this.listingImageRepository = listingImageRepository;
     }
 
     @GetMapping
@@ -30,13 +25,6 @@ public class RecommendationController {
         @CurrentUser User user,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int pageSize) {
-        var results = recommendationService.getRecommendations(user, page, pageSize);
-        var response = results.stream().map(result -> {
-            var images = listingImageRepository.findByListingIdOrderBySortOrderAsc(result.listing().getId());
-            return ListingResponse.from(result.listing(), images.stream()
-                .map(img -> new ListingResponse.ImageInfo(img.getId(), img.getImageUrl(), img.getSortOrder()))
-                .toList());
-        }).toList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(recommendationService.getRecommendations(user, page, pageSize));
     }
 }

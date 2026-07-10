@@ -2,16 +2,18 @@ package com.campusmarketplace.recommendation;
 
 import com.campusmarketplace.category.CategoryRepository;
 import com.campusmarketplace.listing.Listing;
+import com.campusmarketplace.listing.ListingImageRepository;
 import com.campusmarketplace.listing.ListingRepository;
 import com.campusmarketplace.listing.ListingViewRepository;
 import com.campusmarketplace.listing.SearchLogRepository;
+import com.campusmarketplace.listing.dto.ListingResponse;
 import com.campusmarketplace.user.User;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RecommendationService {
@@ -27,21 +29,25 @@ public class RecommendationService {
     );
 
     private final ListingRepository listingRepository;
+    private final ListingImageRepository listingImageRepository;
     private final SearchLogRepository searchLogRepository;
     private final ListingViewRepository listingViewRepository;
     private final CategoryRepository categoryRepository;
 
     public RecommendationService(ListingRepository listingRepository,
+                                 ListingImageRepository listingImageRepository,
                                  SearchLogRepository searchLogRepository,
                                  ListingViewRepository listingViewRepository,
                                  CategoryRepository categoryRepository) {
         this.listingRepository = listingRepository;
+        this.listingImageRepository = listingImageRepository;
         this.searchLogRepository = searchLogRepository;
         this.listingViewRepository = listingViewRepository;
         this.categoryRepository = categoryRepository;
     }
 
-    public List<RecommendationResult> getRecommendations(User user, int page, int pageSize) {
+    @Transactional(readOnly = true)
+    public List<ListingResponse> getRecommendations(User user, int page, int pageSize) {
         var candidates = listingRepository.findActiveListingsExcluding(user.getId());
 
         String userZone = user.getCampusLocation() != null ? user.getCampusLocation().getZone() : null;
@@ -49,25 +55,32 @@ public class RecommendationService {
         long totalInteractions = categoryInteractions.values().stream().mapToLong(l -> l).sum();
         long totalCategories = categoryRepository.countByIsActiveTrue();
 
-        var scored = candidates.stream().map(listing -> {
-            double ratingScore = ratingScore(listing.getOwner().getAvgRating());
-            double locationScore = locationScore(userZone, listing.getCampusLocation().getZone());
-            double preferenceScore = preferenceScore(
-                categoryInteractions.getOrDefault(listing.getCategory().getId(), 0L),
-                totalInteractions, totalCategories);
+        return candidates.stream()
+            .map(listing -> {
+                double ratingScore = ratingScore(listing.getOwner().getAvgRating());
+                double locationScore = locationScore(userZone, listing.getCampusLocation().getZone());
+                double preferenceScore = preferenceScore(
+                    categoryInteractions.getOrDefault(listing.getCategory().getId(), 0L),
+                    totalInteractions, totalCategories);
 
-            double score = RATING_WEIGHT * ratingScore
-                + LOCATION_WEIGHT * locationScore
-                + PREFERENCE_WEIGHT * preferenceScore;
+                return new RecommendationResult(listing, score(ratingScore, locationScore, preferenceScore));
+            })
+            .sorted((a, b) -> Double.compare(b.score(), a.score()))
+            .skip((long) page * pageSize)
+            .limit(pageSize)
+            .map(result -> {
+                var images = listingImageRepository.findByListingIdOrderBySortOrderAsc(result.listing().getId());
+                return ListingResponse.from(result.listing(), images.stream()
+                    .map(img -> new ListingResponse.ImageInfo(img.getId(), img.getImageUrl(), img.getSortOrder()))
+                    .toList());
+            })
+            .toList();
+    }
 
-            return new RecommendationResult(listing, score);
-        })
-        .sorted((a, b) -> Double.compare(b.score(), a.score()))
-        .skip((long) page * pageSize)
-        .limit(pageSize)
-        .toList();
-
-        return scored;
+    private static double score(double ratingScore, double locationScore, double preferenceScore) {
+        return RATING_WEIGHT * ratingScore
+            + LOCATION_WEIGHT * locationScore
+            + PREFERENCE_WEIGHT * preferenceScore;
     }
 
     private Map<Long, Long> getCategoryInteractionCounts(User user) {

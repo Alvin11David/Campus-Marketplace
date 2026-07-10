@@ -2,6 +2,7 @@ C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\Ca
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\Category.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\CategoryController.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\CategoryRepository.java
+C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\dto\CategoryWithCount.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\dto\CreateCategoryRequest.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\category\dto\UpdateCategoryRequest.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\common\ApiException.java
