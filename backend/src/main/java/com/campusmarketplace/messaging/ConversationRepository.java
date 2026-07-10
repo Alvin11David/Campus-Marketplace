@@ -14,10 +14,10 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Query("SELECT c FROM Conversation c JOIN FETCH c.initiator JOIN FETCH c.recipient LEFT JOIN FETCH c.listing WHERE (c.initiator.id = :userId AND c.initiatorArchived = false) OR (c.recipient.id = :userId AND c.recipientArchived = false) ORDER BY c.lastMessageAt DESC NULLS LAST")
     List<Conversation> findByParticipantId(@Param("userId") Long userId);
 
-    @Query("SELECT c FROM Conversation c WHERE c.listing.id = :listingId AND c.initiator.id = :initiatorId AND c.recipient.id = :recipientId")
+    @Query("SELECT c FROM Conversation c WHERE c.listing.id = :listingId AND ((c.initiator.id = :participant1Id AND c.recipient.id = :participant2Id) OR (c.initiator.id = :participant2Id AND c.recipient.id = :participant1Id))")
     Optional<Conversation> findExisting(@Param("listingId") Long listingId,
-                                        @Param("initiatorId") Long initiatorId,
-                                        @Param("recipientId") Long recipientId);
+                                        @Param("participant1Id") Long participant1Id,
+                                        @Param("participant2Id") Long participant2Id);
 
     @Query("SELECT COUNT(c) FROM Conversation c WHERE c.recipient.id = :userId AND c.lastMessageAt IS NOT NULL")
     long countByRecipientId(@Param("userId") Long userId);

@@ -11,6 +11,8 @@ import com.campusmarketplace.user.User;
 import com.campusmarketplace.user.UserRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReviewService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
 
     private final ReviewRepository reviewRepository;
     private final ListingRepository listingRepository;
@@ -47,6 +51,8 @@ public class ReviewService {
         boolean hasConversation = conversationRepository.findExisting(
             request.listingId(), reviewer.getId(), listing.getOwner().getId()).isPresent();
         if (!hasConversation) {
+            log.warn("Review blocked: no conversation found for listing={} reviewer={} owner={}",
+                request.listingId(), reviewer.getId(), listing.getOwner().getId());
             throw ApiException.forbidden("You need to have messaged this provider before leaving a review");
         }
 
