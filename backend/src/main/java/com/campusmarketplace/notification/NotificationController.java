@@ -5,6 +5,7 @@ import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,5 +56,16 @@ public class NotificationController {
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(@CurrentUser User user) {
         return ResponseEntity.ok(notificationRepository.countUnreadByUserId(user.getId()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id, @CurrentUser User user) {
+        var notification = notificationRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+        if (!notification.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+        notificationRepository.delete(notification);
+        return ResponseEntity.noContent().build();
     }
 }
