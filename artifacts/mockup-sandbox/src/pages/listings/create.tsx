@@ -12,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet, apiPost, mapCategory, CAMPUS_LOCATIONS } from "@/lib/api";
-import type { Category } from "@/lib/api";
+import { apiGet, apiPost, mapCategory, fetchLocations } from "@/lib/api";
+import type { Category, CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 interface FormErrors {
@@ -38,7 +38,8 @@ const [customCategoryName, setCustomCategoryName] = useState("");
 const [showCustomCategory, setShowCustomCategory] = useState(false);
 const [campusLocationId, setCampusLocationId] = useState("");
 const [stockQuantity, setStockQuantity] = useState("");
-const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [locations, setLocations] = useState<CampusLocation[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -49,6 +50,7 @@ const [categories, setCategories] = useState<Category[]>([]);
     apiGet<any[]>("/categories")
       .then((data) => setCategories((data ?? []).map(mapCategory)))
       .catch(() => {});
+    fetchLocations().then(setLocations);
   }, []);
 
   const filteredCategories: Category[] = categories.filter((c) => {

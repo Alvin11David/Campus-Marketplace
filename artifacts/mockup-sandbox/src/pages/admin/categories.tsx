@@ -12,7 +12,7 @@ import {
 import {
   Select, SelectTrigger, SelectContent, SelectItem, SelectValue,
 } from "@/components/ui/select";
-import { apiGet, mapCategory } from "@/lib/api";
+import { apiGet, apiPost, apiPatch, apiDelete, mapCategory } from "@/lib/api";
 import type { Category } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -50,50 +50,56 @@ export default function AdminCategories() {
     c.slug.toLowerCase().includes(search.toLowerCase())
   );
 
-  function handleAdd() {
-    const newCat: Category = {
-      id: Math.max(...categories.map((c) => c.id)) + 1,
-      name: form.name,
-      slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
-      listing_type_hint: form.listing_type_hint,
-      icon_name: "Package",
-      description: form.description || null,
-      is_active: true,
-      active_listing_count: 0,
-    };
-    setCategories((prev) => [...prev, newCat]);
-    setShowAddDialog(false);
-    setForm(defaultForm);
-    toast.success(`Category "${newCat.name}" created`);
+  async function handleAdd() {
+    try {
+      const newCat = await apiPost<any>("/categories", {
+        name: form.name,
+        listingTypeHint: form.listing_type_hint,
+      });
+      setCategories((prev) => [...prev, mapCategory(newCat)]);
+      setShowAddDialog(false);
+      setForm(defaultForm);
+      toast.success(`Category "${form.name}" created`);
+    } catch {
+      toast.error("Failed to create category");
+    }
   }
 
-  function handleSaveEdit() {
+  async function handleSaveEdit() {
     if (!editingCategory) return;
-    setCategories((prev) =>
-      prev.map((c) =>
-        c.id === editingCategory.id
-          ? {
-              ...c,
-              name: form.name,
-              slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
-              listing_type_hint: form.listing_type_hint,
-              description: form.description || null,
-            }
-          : c
-      )
-    );
-    setEditingCategory(null);
-    setForm(defaultForm);
-    toast.success("Category updated");
+    try {
+      await apiPatch(`/categories/${editingCategory.id}`, {
+        name: form.name,
+        listingTypeHint: form.listing_type_hint,
+        description: form.description || null,
+      });
+      setCategories((prev) =>
+        prev.map((c) =>
+          c.id === editingCategory.id
+            ? { ...c, name: form.name, listing_type_hint: form.listing_type_hint, description: form.description || null }
+            : c
+        )
+      );
+      setEditingCategory(null);
+      setForm(defaultForm);
+      toast.success("Category updated");
+    } catch {
+      toast.error("Failed to update category");
+    }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!deleteTarget) return;
-    setCategories((prev) => prev.map((c) =>
-      c.id === deleteTarget.id ? { ...c, is_active: false } : c
-    ));
-    setDeleteTarget(null);
-    toast.success(`Category "${deleteTarget.name}" retired`);
+    try {
+      await apiDelete(`/categories/${deleteTarget.id}`);
+      setCategories((prev) => prev.map((c) =>
+        c.id === deleteTarget.id ? { ...c, is_active: false } : c
+      ));
+      setDeleteTarget(null);
+      toast.success(`Category "${deleteTarget.name}" retired`);
+    } catch {
+      toast.error("Failed to retire category");
+    }
   }
 
   function openEdit(cat: Category) {
