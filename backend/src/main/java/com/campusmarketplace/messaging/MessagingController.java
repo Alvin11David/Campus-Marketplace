@@ -57,6 +57,18 @@ public class MessagingController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/conversations/{id}/archive")
+    public ResponseEntity<Void> archiveConversation(@PathVariable Long id, @CurrentUser User user) {
+        messagingService.archiveConversation(id, user);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/conversations/{id}/restore")
+    public ResponseEntity<Void> restoreConversation(@PathVariable Long id, @CurrentUser User user) {
+        messagingService.restoreConversation(id, user);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/conversations/{id}")
     public ResponseEntity<Void> deleteConversation(@PathVariable Long id, @CurrentUser User user) {
         messagingService.deleteConversation(id, user);

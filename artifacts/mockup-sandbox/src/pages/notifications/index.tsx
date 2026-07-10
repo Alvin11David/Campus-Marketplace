@@ -51,8 +51,12 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     setLoading(true);
-    apiGet<{ results: any[] }>("/notifications?page=0&pageSize=50")
-      .then((data) => setActive((data.results ?? []).map(mapNotification)))
+    Promise.all([
+      apiGet<{ results: any[] }>("/notifications?archived=false&page=0&pageSize=50")
+        .then((data) => setActive((data.results ?? []).map(mapNotification))),
+      apiGet<{ results: any[] }>("/notifications?archived=true&page=0&pageSize=50")
+        .then((data) => setArchived((data.results ?? []).map(mapNotification))),
+    ])
       .catch(() => toast.error("Failed to load notifications"))
       .finally(() => setLoading(false));
   }, []);
@@ -80,18 +84,21 @@ export default function NotificationsPage() {
   }, []);
 
   const handleArchive = useCallback((notif: Notification) => {
+    apiPost("/notifications/" + notif.id + "/archive", {}).catch(() => {});
     setActive((prev) => prev.filter((n) => n.id !== notif.id));
     setArchived((prev) => [...prev, notif]);
     toast.success("Notification archived");
   }, []);
 
   const handleRestore = useCallback((notif: Notification) => {
+    apiPost("/notifications/" + notif.id + "/restore", {}).catch(() => {});
     setArchived((prev) => prev.filter((n) => n.id !== notif.id));
     setActive((prev) => [...prev, { ...notif, is_read: true }]);
     toast.success("Notification restored");
   }, []);
 
   const handleRestoreAll = useCallback(() => {
+    archived.forEach((n) => apiPost("/notifications/" + n.id + "/restore", {}).catch(() => {}));
     setActive((prev) => [...prev, ...archived.map((n) => ({ ...n, is_read: true }))]);
     setArchived([]);
     toast.success("All notifications restored");
