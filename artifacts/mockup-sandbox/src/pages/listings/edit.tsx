@@ -15,7 +15,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet, apiPatch, apiDelete, mapCategory, mapListing, fetchLocations } from "@/lib/api";
+import { apiGet, apiPatch, apiDelete, apiUpload, mapCategory, mapListing, fetchLocations } from "@/lib/api";
 import type { Category, Listing, CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +45,7 @@ export default function EditListingPage() {
   const [campusLocationId, setCampusLocationId] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -134,15 +135,21 @@ export default function EditListingPage() {
     if (!validate()) return;
     setSaving(true);
     try {
-      await apiPatch(`/listings/${id}`, {
-        title,
-        description,
-        price: Number(price),
-        currency: "UGX",
-        stockQuantity: listingType === "product" ? Number(stockQuantity) : null,
-        categoryId: Number(categoryId),
-        campusLocationId: Number(campusLocationId),
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("price", String(price));
+      formData.append("currency", "UGX");
+      formData.append("categoryId", String(categoryId));
+      formData.append("campusLocationId", String(campusLocationId));
+      if (listingType === "product") {
+        formData.append("stockQuantity", String(stockQuantity));
+      }
+      imageFiles.forEach((file) => {
+        formData.append("images", file);
       });
+
+      await apiUpload<any>(`/listings/${id}`, formData);
       toast.success("Listing updated");
       navigate(`/listings/${id}`);
     } catch {
@@ -178,11 +185,13 @@ export default function EditListingPage() {
       };
       reader.readAsDataURL(file);
     });
+    setImageFiles((prev) => [...prev, ...selected]);
     e.target.value = "";
   };
 
   const removeImage = (idx: number) => {
     setImages((prev) => prev.filter((_, i) => i !== idx));
+    setImageFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleTypeChange = (value: string) => {

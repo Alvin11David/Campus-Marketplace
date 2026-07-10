@@ -83,6 +83,28 @@ export function apiDelete<T>(path: string): Promise<T> {
   return request<T>("DELETE", path);
 }
 
+export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  const token = localStorage.getItem("cm_token");
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    let err: Record<string, unknown>;
+    try { err = JSON.parse(text); } catch { err = { detail: text || "Upload failed" }; }
+    console.error("Upload error:", res.status, err);
+    throw new Error(extractError(err));
+  }
+
+  return res.json();
+}
+
 export interface User {
   id: number;
   full_name: string;
