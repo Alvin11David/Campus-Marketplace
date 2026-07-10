@@ -5,14 +5,7 @@ import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { mockupPreviewPlugin } from "./mockupPreviewPlugin";
 
-const rawPort = process.env.PORT;
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
+const rawPort = process.env.PORT || "5173";
 const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
@@ -125,6 +118,9 @@ export default defineConfig({
     allowedHosts: true,
     fs: {
       strict: true,
+    },
+    proxy: {
+      "/uploads": "http://localhost:8080",
     },
   },
   preview: {
