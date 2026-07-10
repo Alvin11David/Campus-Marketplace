@@ -33,8 +33,8 @@ export default defineConfig({
         display_override: ["window-controls-overlay", "standalone"],
         orientation: "portrait-primary",
         scope: "/",
-        start_url: "/",
-        id: "/",
+        start_url: "/?v=2",
+        id: "/?v=2",
         icons: [
           {
             src: "icons/icon-192.svg",
