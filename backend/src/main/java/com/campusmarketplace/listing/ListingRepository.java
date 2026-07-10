@@ -25,8 +25,8 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
         AND (:maxPrice IS NULL OR l.price <= :maxPrice)
         AND (:campusLocationId IS NULL OR l.campusLocation.id = :campusLocationId)
         AND (:listingType IS NULL OR l.listingType = :listingType)
-        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%'))
-             OR LOWER(l.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%')))
+        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+             OR LOWER(l.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
         """,
         countQuery = """
         SELECT COUNT(l) FROM Listing l
@@ -36,8 +36,8 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
         AND (:maxPrice IS NULL OR l.price <= :maxPrice)
         AND (:campusLocationId IS NULL OR l.campusLocation.id = :campusLocationId)
         AND (:listingType IS NULL OR l.listingType = :listingType)
-        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%'))
-             OR LOWER(l.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%')))
+        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+             OR LOWER(l.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
         """)
     Page<Listing> searchListings(
         @Param("searchTerm") String searchTerm,

@@ -47,6 +47,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
         log.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse("An unexpected error occurred: " + ex.getClass().getSimpleName() + " - " + ex.getMessage()));
+            .body(new ErrorResponse("ERR: " + ex.getClass().getSimpleName() + " - " + ex.getMessage()));
     }
 }
