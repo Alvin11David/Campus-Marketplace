@@ -190,6 +190,14 @@ public class ListingService {
         }
 
         listing = listingRepository.save(listing);
+
+        if (request.imageUrls() != null) {
+            listingImageRepository.deleteByListingId(listing.getId());
+            for (int i = 0; i < Math.min(request.imageUrls().size(), 5); i++) {
+                listingImageRepository.save(new ListingImage(listing, request.imageUrls().get(i), i));
+            }
+        }
+
         var images = listingImageRepository.findByListingIdOrderBySortOrderAsc(listing.getId());
         return ListingResponse.from(listing, images.stream()
             .map(img -> new ListingResponse.ImageInfo(img.getId(), img.getImageUrl(), img.getSortOrder()))

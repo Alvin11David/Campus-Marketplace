@@ -38,7 +38,7 @@ public record ListingResponse(
             new LocationInfo(listing.getCampusLocation().getId(), listing.getCampusLocation().getName()),
             new OwnerInfo(listing.getOwner().getId(), listing.getOwner().getFullName(),
                 listing.getOwner().getAvgRating(), listing.getOwner().getRatingCount()),
-            images != null && !images.isEmpty() ? images.getFirst().imageUrl() : null,
+            images != null && !images.isEmpty() ? images.stream().findFirst().map(ImageInfo::imageUrl).orElse(null) : null,
             listing.getAvgRating(),
             listing.getRatingCount(),
             listing.getStatus(),

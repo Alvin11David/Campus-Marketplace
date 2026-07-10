@@ -3,7 +3,14 @@ export const API_BASE = `${API_ORIGIN}/api/v1`;
 
 export function absoluteUrl(path: string | null): string | null {
   if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:") ||
+    path.startsWith("blob:")
+  ) {
+    return path;
+  }
   return `${API_ORIGIN}${path}`;
 }
 
@@ -12,7 +19,8 @@ function extractError(body: Record<string, unknown>): string {
     const fieldMsgs = Object.entries(body.errors as Record<string, string[]>)
       .map(([field, msgs]) => `${field}: ${msgs.join(", ")}`)
       .join("; ");
-    if (fieldMsgs) return `${body.detail ?? "Validation failed"} (${fieldMsgs})`;
+    if (fieldMsgs)
+      return `${body.detail ?? "Validation failed"} (${fieldMsgs})`;
   }
   return (body.detail as string) || "Request failed";
 }
@@ -36,8 +44,14 @@ async function refreshToken(): Promise<string | null> {
   }
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   const token = localStorage.getItem("cm_token");
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API_BASE}${path}`, {
@@ -60,7 +74,11 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   if (!res.ok) {
     const text = await res.text();
     let err: Record<string, unknown>;
-    try { err = JSON.parse(text); } catch { err = { detail: text || "Request failed" }; }
+    try {
+      err = JSON.parse(text);
+    } catch {
+      err = { detail: text || "Request failed" };
+    }
     console.error("API error:", res.status, err);
     throw new Error(extractError(err));
   }
@@ -83,7 +101,11 @@ export function apiDelete<T>(path: string): Promise<T> {
   return request<T>("DELETE", path);
 }
 
-export async function apiUpload<T>(path: string, formData: FormData, method: string = "POST"): Promise<T> {
+export async function apiUpload<T>(
+  path: string,
+  formData: FormData,
+  method: string = "POST",
+): Promise<T> {
   const token = localStorage.getItem("cm_token");
   const headers: Record<string, string> = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -97,7 +119,11 @@ export async function apiUpload<T>(path: string, formData: FormData, method: str
   if (!res.ok) {
     const text = await res.text();
     let err: Record<string, unknown>;
-    try { err = JSON.parse(text); } catch { err = { detail: text || "Upload failed" }; }
+    try {
+      err = JSON.parse(text);
+    } catch {
+      err = { detail: text || "Upload failed" };
+    }
     console.error("Upload error:", res.status, err);
     throw new Error(extractError(err));
   }
@@ -216,7 +242,10 @@ export function mapListing(data: any): Listing {
     category: { id: data.category.id, name: data.category.name },
     campus_location_id: data.campusLocation.id,
     campus_location_name: data.campusLocation.name,
-    campus_location: { id: data.campusLocation.id, name: data.campusLocation.name },
+    campus_location: {
+      id: data.campusLocation.id,
+      name: data.campusLocation.name,
+    },
     created_at: data.createdAt,
     updated_at: data.createdAt,
   };

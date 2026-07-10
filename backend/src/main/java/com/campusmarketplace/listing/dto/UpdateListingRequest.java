@@ -1,6 +1,7 @@
 package com.campusmarketplace.listing.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record UpdateListingRequest(
     String title,
@@ -9,5 +10,6 @@ public record UpdateListingRequest(
     String currency,
     Integer stockQuantity,
     Long categoryId,
-    Long campusLocationId
+    Long campusLocationId,
+    List<String> imageUrls
 ) {}
