@@ -5,7 +5,12 @@ import com.campusmarketplace.listing.dto.ListingResponse;
 import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.dto.*;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -96,8 +103,24 @@ public class UserController {
 
     @PostMapping("/users/me/deactivate")
     public ResponseEntity<MessageResponse> deactivate(@CurrentUser User user,
-                                                      @Valid @RequestBody DeactivateRequest request) {
+                                                       @Valid @RequestBody DeactivateRequest request) {
         userService.deactivate(user, request);
         return ResponseEntity.ok(new MessageResponse("Account deactivated."));
+    }
+
+    @PostMapping("/users/me/photo")
+    public ResponseEntity<UserProfileResponse> uploadPhoto(@CurrentUser User user,
+                                                           @RequestParam("file") MultipartFile file) {
+        try {
+            String uploadDir = "uploads/photos";
+            Files.createDirectories(Paths.get(uploadDir));
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, filename);
+            Files.copy(file.getInputStream(), filePath);
+            String photoUrl = "/" + uploadDir + "/" + filename;
+            return ResponseEntity.ok(userService.updatePhoto(user, photoUrl));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload photo", e);
+        }
     }
 }

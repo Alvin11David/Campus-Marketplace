@@ -26,4 +26,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     @Query("SELECT MIN(m.createdAt) FROM Message m WHERE m.conversation.id = :conversationId")
     java.time.Instant findFirstMessageTime(@Param("conversationId") Long conversationId);
+
+    @Modifying
+    void deleteByConversationId(Long conversationId);
 }

@@ -127,6 +127,20 @@ public class MessagingService {
         messageRepository.markAsRead(conversationId, user.getId());
     }
 
+    @Transactional
+    public void deleteConversation(Long conversationId, User user) {
+        var conversation = conversationRepository.findByIdWithDetails(conversationId)
+            .orElseThrow(() -> ApiException.notFound("Conversation not found"));
+
+        if (!conversation.getInitiator().getId().equals(user.getId()) &&
+            !conversation.getRecipient().getId().equals(user.getId())) {
+            throw ApiException.forbidden("You are not a participant in this conversation");
+        }
+
+        messageRepository.deleteByConversationId(conversationId);
+        conversationRepository.delete(conversation);
+    }
+
     public long getTotalUnreadCount(Long userId) {
         return messageRepository.countTotalUnreadByUserId(userId);
     }
