@@ -48,6 +48,7 @@ C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\mo
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\moderation\Report.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\moderation\ReportController.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\moderation\ReportRepository.java
+C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\notification\dto\NotificationResponse.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\notification\Notification.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\notification\NotificationController.java
 C:\Users\ALVIN\Campus-Marketplace\backend\src\main\java\com\campusmarketplace\notification\NotificationRepository.java

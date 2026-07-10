@@ -1,6 +1,7 @@
 package com.campusmarketplace.notification;
 
 import com.campusmarketplace.common.PageResponse;
+import com.campusmarketplace.notification.dto.NotificationResponse;
 import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.User;
 import org.springframework.data.domain.PageRequest;
@@ -24,14 +25,15 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<Notification>> getNotifications(
+    public ResponseEntity<PageResponse<NotificationResponse>> getNotifications(
         @CurrentUser User user,
         @RequestParam(defaultValue = "false") boolean archived,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "50") int pageSize) {
         var pageable = PageRequest.of(page, pageSize);
         var notifPage = notificationRepository.findByUserIdAndIsArchivedOrderByCreatedAtDesc(user.getId(), archived, pageable);
-        var response = PageResponse.from(notifPage, notifPage.getContent(), null);
+        var dtos = notifPage.getContent().stream().map(NotificationResponse::from).toList();
+        var response = PageResponse.from(notifPage, dtos, null);
         return ResponseEntity.ok(response);
     }
 

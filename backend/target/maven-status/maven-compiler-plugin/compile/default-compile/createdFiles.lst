@@ -84,6 +84,7 @@ com\campusmarketplace\review\Review.class
 com\campusmarketplace\user\dto\RefreshTokenRequest.class
 com\campusmarketplace\user\UserRepository.class
 com\campusmarketplace\location\CampusLocation.class
+com\campusmarketplace\notification\dto\NotificationResponse.class
 com\campusmarketplace\review\ReviewService.class
 com\campusmarketplace\messaging\dto\SendMessageRequest.class
 com\campusmarketplace\config\WebConfig.class
