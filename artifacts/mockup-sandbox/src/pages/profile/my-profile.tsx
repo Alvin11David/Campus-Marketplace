@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Package, Star, MessageSquare, AlertTriangle, Save, Store, ShieldAlert, List, MapPin, Phone, User, BadgeCheck } from "lucide-react";
@@ -39,6 +39,7 @@ function ProfileSkeleton() {
 export default function MyProfilePage() {
   const { user, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [locations, setLocations] = useState<CampusLocation[]>([]);
   const [form, setForm] = useState({
@@ -55,8 +56,32 @@ export default function MyProfilePage() {
   const [pendingSeller, setPendingSeller] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [deactivatePassword, setDeactivatePassword] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("cm_token");
+      const res = await fetch("http://localhost:8080/api/v1/users/me/photo", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      await refreshUser();
+      toast.success("Photo updated");
+    } catch {
+      toast.error("Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const initials = user?.full_name
     ?.split(" ")
