@@ -10,8 +10,8 @@ public record PageResponse<T>(
     List<T> results
 ) {
     public static <T> PageResponse<T> from(Page<?> page, List<T> content, String baseUrl) {
-        String nextUrl = page.hasNext() ? buildPageUrl(baseUrl, page.nextPageable().getPageNumber()) : null;
-        String prevUrl = page.hasPrevious() ? buildPageUrl(baseUrl, page.previousPageable().getPageNumber()) : null;
+        String nextUrl = (baseUrl != null && page.hasNext()) ? buildPageUrl(baseUrl, page.nextPageable().getPageNumber()) : null;
+        String prevUrl = (baseUrl != null && page.hasPrevious()) ? buildPageUrl(baseUrl, page.previousPageable().getPageNumber()) : null;
         return new PageResponse<>(page.getTotalElements(), nextUrl, prevUrl, content);
     }
 
