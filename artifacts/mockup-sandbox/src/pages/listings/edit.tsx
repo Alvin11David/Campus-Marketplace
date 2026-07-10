@@ -15,8 +15,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet, apiPatch, apiDelete, mapCategory, mapListing, CAMPUS_LOCATIONS } from "@/lib/api";
-import type { Category, Listing } from "@/lib/api";
+import { apiGet, apiPatch, apiDelete, mapCategory, mapListing, fetchLocations } from "@/lib/api";
+import type { Category, Listing, CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 interface FormErrors {
@@ -35,6 +35,7 @@ export default function EditListingPage() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [locations, setLocations] = useState<CampusLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [listingType, setListingType] = useState<"service" | "product">("service");
   const [title, setTitle] = useState("");
@@ -57,6 +58,7 @@ export default function EditListingPage() {
     Promise.all([
       apiGet<any>(`/listings/${id}`).then(mapListing),
       apiGet<any[]>("/categories").then((data) => (data ?? []).map(mapCategory)),
+      fetchLocations().then(setLocations),
     ])
       .then(([listingData, cats]) => {
         if (user && listingData.owner.id !== user.id) {
@@ -284,7 +286,7 @@ export default function EditListingPage() {
                   <SelectValue placeholder="Select a location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CAMPUS_LOCATIONS.map((loc) => (
+                  {locations.map((loc) => (
                     <SelectItem key={loc.id} value={loc.id.toString()}>
                       {loc.name}
                     </SelectItem>

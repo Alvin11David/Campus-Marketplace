@@ -285,7 +285,7 @@ const [stockQuantity, setStockQuantity] = useState("");
                   <SelectValue placeholder="Select a location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CAMPUS_LOCATIONS.map((loc) => (
+                  {locations.map((loc) => (
                     <SelectItem key={loc.id} value={loc.id.toString()}>
                       {loc.name}
                     </SelectItem>
