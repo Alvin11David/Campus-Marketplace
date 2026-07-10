@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { apiGet, apiPost, mapConversation, type Conversation } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, mapConversation, type Conversation } from "@/lib/api";
 
 function getInitials(name: string) {
   return name

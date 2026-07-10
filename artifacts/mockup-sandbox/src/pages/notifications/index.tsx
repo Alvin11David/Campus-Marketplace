@@ -64,6 +64,7 @@ export default function NotificationsPage() {
   }, []);
 
   const handleToggleRead = useCallback((notif: Notification, list: "active" | "archived") => {
+    apiPost("/notifications/" + notif.id + "/mark-read", {}).catch(() => {});
     const updater = (prev: Notification[]) =>
       prev.map((n) => (n.id === notif.id ? { ...n, is_read: !n.is_read } : n));
     if (list === "active") setActive(updater);
@@ -71,6 +72,7 @@ export default function NotificationsPage() {
   }, []);
 
   const handleDelete = useCallback((notif: Notification, list: "active" | "archived") => {
+    apiDelete("/notifications/" + notif.id).catch(() => {});
     const updater = (prev: Notification[]) => prev.filter((n) => n.id !== notif.id);
     if (list === "active") setActive(updater);
     else setArchived(updater);
