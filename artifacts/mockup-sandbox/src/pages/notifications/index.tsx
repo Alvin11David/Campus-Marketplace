@@ -131,41 +131,39 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-4 md:py-12 4xl:max-w-4xl">
-        <div className="mb-3 md:mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div className="flex items-center gap-2 md:gap-3">
+      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12 4xl:max-w-4xl">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <BackButton className="-ml-1" />
             <div>
-              <h1 className="text-xl md:text-3xl font-bold tracking-tight">Notifications</h1>
-              <p className="hidden sm:block mt-0.5 md:mt-1 text-xs md:text-sm text-muted-foreground">
+              <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
+              <p className="mt-1 text-muted-foreground">
                 {view === "active" ? "Stay updated on your activity" : "Archived notifications"}
               </p>
             </div>
           </div>
-          <div className="flex gap-2 sm:justify-end">
-            {view === "active" && unreadCount > 0 && (
-              <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="active:scale-95 transition-transform w-full sm:w-auto text-xs sm:text-sm">
-                Mark All as Read
-              </Button>
-            )}
-            {view === "archived" && archived.length > 0 && (
-              <Button variant="outline" size="sm" onClick={handleRestoreAll} className="active:scale-95 transition-transform w-full sm:w-auto gap-1.5 text-xs sm:text-sm">
-                <ArchiveRestore className="h-3.5 w-3.5" /> Restore All
-              </Button>
-            )}
-          </div>
+          {view === "active" && unreadCount > 0 && (
+            <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="active:scale-95 transition-transform shrink-0">
+              Mark All as Read
+            </Button>
+          )}
+          {view === "archived" && archived.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleRestoreAll} className="active:scale-95 transition-transform shrink-0 gap-1.5">
+              <ArchiveRestore className="h-3.5 w-3.5" /> Restore All
+            </Button>
+          )}
         </div>
 
         {/* View tabs */}
-        <Tabs value={view} onValueChange={(v) => setView(v as ViewTab)} className="mb-4 md:mb-6">
-          <TabsList className="h-9 w-full sm:w-auto">
-            <TabsTrigger value="active" className="flex-1 sm:flex-initial gap-1.5 text-xs">
+        <Tabs value={view} onValueChange={(v) => setView(v as ViewTab)} className="mb-6">
+          <TabsList className="h-9">
+            <TabsTrigger value="active" className="gap-1.5 text-xs">
               <Inbox className="h-3.5 w-3.5" /> Active
               {active.length > 0 && (
                 <span className="text-[10px] text-muted-foreground ml-0.5">({active.length})</span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="archived" className="flex-1 sm:flex-initial gap-1.5 text-xs">
+            <TabsTrigger value="archived" className="gap-1.5 text-xs">
               <Archive className="h-3.5 w-3.5" /> Archived
               {archived.length > 0 && (
                 <span className="text-[10px] text-muted-foreground ml-0.5">({archived.length})</span>
@@ -195,7 +193,7 @@ export default function NotificationsPage() {
           )
         ) : (
           <div className="rounded-xl border border-primary/5 overflow-hidden">
-            <ScrollArea className="h-[calc(100dvh-16rem)] md:h-[calc(100vh-20rem)]">
+            <ScrollArea className="h-[calc(100vh-20rem)]">
               <StaggerFade className="space-y-0">
                 {currentList.map((notif, index) => {
                   const Icon = iconMap[notif.notif_type] || Bell;
@@ -292,7 +290,7 @@ export default function NotificationsPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 opacity-100 md:opacity-0 md:group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity"
+                                  className="h-7 w-7 md:opacity-0 md:group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <MoreHorizontal className="h-3.5 w-3.5" />
