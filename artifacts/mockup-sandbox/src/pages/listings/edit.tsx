@@ -50,6 +50,7 @@ export default function EditListingPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [forbidden, setForbidden] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -164,8 +165,6 @@ export default function EditListingPage() {
       setSaving(false);
     }
   };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
