@@ -1,10 +1,14 @@
 package com.campusmarketplace.category;
 
 import com.campusmarketplace.category.dto.CreateCategoryRequest;
+import com.campusmarketplace.category.dto.CategoryWithCount;
 import com.campusmarketplace.category.dto.UpdateCategoryRequest;
 import com.campusmarketplace.common.ApiException;
+import com.campusmarketplace.listing.ListingRepository;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,14 +25,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoryController {
 
     private final CategoryRepository categoryRepository;
+    private final ListingRepository listingRepository;
 
-    public CategoryController(CategoryRepository categoryRepository) {
+    public CategoryController(CategoryRepository categoryRepository, ListingRepository listingRepository) {
         this.categoryRepository = categoryRepository;
+        this.listingRepository = listingRepository;
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> listCategories() {
-        return ResponseEntity.ok(categoryRepository.findByIsActiveTrue());
+    public ResponseEntity<List<CategoryWithCount>> listCategories() {
+        var categories = categoryRepository.findByIsActiveTrue();
+        var counts = listingRepository.countActiveListingsByCategory()
+            .stream()
+            .collect(Collectors.toMap(
+                com.campusmarketplace.listing.CategoryListingCount::getCategoryId,
+                com.campusmarketplace.listing.CategoryListingCount::getListingCount
+            ));
+        var result = categories.stream()
+            .map(cat -> new CategoryWithCount(cat, counts.getOrDefault(cat.getId(), 0L)))
+            .toList();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{slug}")

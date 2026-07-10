@@ -203,7 +203,7 @@ export function mapCategory(data: any): Category {
     icon_name: data.iconName ?? "Package",
     description: data.description ?? null,
     is_active: data.active ?? true,
-    active_listing_count: 0,
+    active_listing_count: data.activeListingCount ?? 0,
   };
 }
 
