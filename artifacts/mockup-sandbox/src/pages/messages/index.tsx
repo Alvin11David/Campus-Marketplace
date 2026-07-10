@@ -73,7 +73,7 @@ export default function MessagesPage() {
   };
 
   const handleArchive = (conv: Conversation) => {
-    apiDelete("/conversations/" + conv.id).catch(() => {});
+    apiPost("/conversations/" + conv.id + "/archive", {}).catch(() => {});
     setConversations((prev) => prev.filter((c) => c.id !== conv.id));
     toast.success("Conversation archived");
   };
