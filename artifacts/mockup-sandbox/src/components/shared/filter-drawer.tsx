@@ -26,6 +26,9 @@ interface FilterDrawerProps {
 
 export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: FilterDrawerProps) {
   const [open, setOpen] = useState(false);
+  const [locations, setLocations] = useState<CampusLocation[]>([]);
+
+  useEffect(() => { fetchLocations().then(setLocations); }, []);
 
   const clearAll = () => {
     onFiltersChange({
@@ -94,7 +97,7 @@ export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: Filt
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All locations</SelectItem>
-                {CAMPUS_LOCATIONS.map((loc) => (
+                {locations.map((loc) => (
                   <SelectItem key={loc.id} value={String(loc.id)}>
                     {loc.name}
                   </SelectItem>
