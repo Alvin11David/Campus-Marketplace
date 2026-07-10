@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import type { User } from "@/lib/api";
-import { apiPost, apiGet, API_BASE } from "@/lib/api";
+import { apiPost, apiGet, API_BASE, absoluteUrl } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -28,7 +28,7 @@ function mapUser(data: any): User {
     email: data.email,
     phone: data.phone,
     bio: data.bio ?? null,
-    profile_photo_url: data.profilePhotoUrl ?? null,
+    profile_photo_url: absoluteUrl(data.profilePhotoUrl),
     campus_location_id: data.campusLocation?.id ?? null,
     campus_location_name: data.campusLocation?.name ?? null,
     is_provider: data.isProvider,

@@ -1,6 +1,12 @@
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? "http://localhost:8080";
 export const API_BASE = `${API_ORIGIN}/api/v1`;
 
+export function absoluteUrl(path: string | null): string | null {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return `${API_ORIGIN}${path}`;
+}
+
 function extractError(body: Record<string, unknown>): string {
   if (body.errors && typeof body.errors === "object") {
     const fieldMsgs = Object.entries(body.errors as Record<string, string[]>)
@@ -166,21 +172,21 @@ export function mapListing(data: any): Listing {
     location_details: null,
     view_count: data.viewCount ?? 0,
     message_count: data.messageCount ?? 0,
-    primary_image_url: data.primaryImageUrl ?? null,
+    primary_image_url: absoluteUrl(data.primaryImageUrl),
     currency: data.currency ?? "UGX",
     stock_quantity: data.stockQuantity ?? null,
     avg_rating: data.avgRating ?? null,
     owner: {
       id: data.owner.id,
       full_name: data.owner.fullName,
-      profile_photo_url: data.owner.profilePhotoUrl ?? null,
+      profile_photo_url: absoluteUrl(data.owner.profilePhotoUrl),
       avg_rating: data.owner.avgRating ?? null,
       rating_count: data.owner.ratingCount ?? 0,
       is_verified: false,
     },
     images: (data.images ?? []).map((img: any) => ({
       id: img.id,
-      image_url: img.imageUrl,
+      image_url: absoluteUrl(img.imageUrl) ?? "",
       sort_order: img.sortOrder,
     })),
     category_id: data.category.id,
@@ -241,7 +247,7 @@ export function mapConversation(data: any): Conversation {
     other_participant: {
       id: data.otherParticipant.id,
       full_name: data.otherParticipant.fullName,
-      profile_photo_url: data.otherParticipant.profilePhotoUrl ?? null,
+      profile_photo_url: absoluteUrl(data.otherParticipant.profilePhotoUrl),
     },
     last_message_preview: data.lastMessagePreview ?? "",
     last_message_at: data.lastMessageAt,
@@ -307,7 +313,7 @@ export function mapReview(data: any): Review {
     reviewer: {
       id: data.reviewer.id,
       full_name: data.reviewer.fullName,
-      profile_photo_url: data.reviewer.profilePhotoUrl ?? null,
+      profile_photo_url: absoluteUrl(data.reviewer.profilePhotoUrl),
     },
     created_at: data.createdAt,
   };
