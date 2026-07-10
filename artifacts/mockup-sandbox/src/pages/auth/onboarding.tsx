@@ -51,7 +51,7 @@ export default function Onboarding() {
     navigate("/dashboard", { replace: true });
   };
 
-  const location = CAMPUS_LOCATIONS.find((l) => l.id === Number(campusLocationId));
+  const location = locations.find((l) => l.id === Number(campusLocationId));
 
   return (
     <div className="min-h-screen bg-background flex items-start sm:items-center justify-center p-4 relative pt-16 sm:pt-4">
@@ -142,7 +142,7 @@ export default function Onboarding() {
                       <SelectValue placeholder="Select your campus location" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CAMPUS_LOCATIONS.map((loc) => (
+                      {locations.map((loc) => (
                         <SelectItem key={loc.id} value={String(loc.id)}>
                           <div className="flex items-center gap-2">
                             <MapPin className="h-3.5 w-3.5 text-muted-foreground" />

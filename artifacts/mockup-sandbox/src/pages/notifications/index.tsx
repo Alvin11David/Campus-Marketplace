@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { apiGet, apiPost, mapNotification, type Notification } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, mapNotification, type Notification } from "@/lib/api";
 
 const iconMap: Record<string, React.ElementType> = {
   new_message: MessageSquare,

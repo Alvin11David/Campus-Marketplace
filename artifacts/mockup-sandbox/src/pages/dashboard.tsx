@@ -84,12 +84,17 @@ export default function Dashboard() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      apiGet<any>("/listings?page=0&pageSize=6").then((data) => {
+      apiGet<any[]>("/recommendations?page=0&pageSize=6").then((data) => {
+        if (!cancelled) {
+          setActiveCount(data.length ?? 0);
+          setRecommended((data ?? []).map(mapListing));
+        }
+      }).catch(() => apiGet<any>("/listings?page=0&pageSize=6").then((data) => {
         if (!cancelled) {
           setActiveCount(data.count ?? 0);
           setRecommended((data.results ?? []).map(mapListing));
         }
-      }),
+      })),
       apiGet<any[]>("/categories").then((data) => {
         if (!cancelled) setCategories((data ?? []).map(mapCategory));
       }),
