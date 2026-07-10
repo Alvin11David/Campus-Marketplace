@@ -490,9 +490,6 @@ export default function ConversationPage() {
           </div>
         </Link>
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground active:scale-90 transition-transform">
-            <Paperclip className="h-4 w-4" />
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground active:scale-90 transition-transform">
