@@ -94,8 +94,14 @@ public class ListingService {
         Sort sort = resolveSort(sortBy);
         Pageable pageable = PageRequest.of(page, pageSize, sort);
 
-        Page<Listing> listingPage = listingRepository.searchListings(
-            query, categoryId, minPrice, maxPrice, campusLocationId, listingType, pageable);
+        Page<Listing> listingPage;
+        if (query != null) {
+            listingPage = listingRepository.searchListings(
+                query, categoryId, minPrice, maxPrice, campusLocationId, listingType, pageable);
+        } else {
+            listingPage = listingRepository.filterListings(
+                categoryId, minPrice, maxPrice, campusLocationId, listingType, pageable);
+        }
 
         if (query != null && currentUser != null) {
             searchLogRepository.save(new SearchLog(currentUser, query,

@@ -25,8 +25,8 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
         AND (:maxPrice IS NULL OR l.price <= :maxPrice)
         AND (:campusLocationId IS NULL OR l.campusLocation.id = :campusLocationId)
         AND (:listingType IS NULL OR l.listingType = :listingType)
-        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-             OR LOWER(l.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%'))
+             OR LOWER(l.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%')))
         """,
         countQuery = """
         SELECT COUNT(l) FROM Listing l
@@ -36,11 +36,37 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
         AND (:maxPrice IS NULL OR l.price <= :maxPrice)
         AND (:campusLocationId IS NULL OR l.campusLocation.id = :campusLocationId)
         AND (:listingType IS NULL OR l.listingType = :listingType)
-        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-             OR LOWER(l.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+        AND (:searchTerm IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%'))
+             OR LOWER(l.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS text), '%')))
         """)
     Page<Listing> searchListings(
         @Param("searchTerm") String searchTerm,
+        @Param("categoryId") Long categoryId,
+        @Param("minPrice") BigDecimal minPrice,
+        @Param("maxPrice") BigDecimal maxPrice,
+        @Param("campusLocationId") Long campusLocationId,
+        @Param("listingType") String listingType,
+        Pageable pageable);
+
+    @Query(value = """
+        SELECT l FROM Listing l JOIN FETCH l.owner JOIN FETCH l.category JOIN FETCH l.campusLocation
+        WHERE l.status = 'active'
+        AND (:categoryId IS NULL OR l.category.id = :categoryId)
+        AND (:minPrice IS NULL OR l.price >= :minPrice)
+        AND (:maxPrice IS NULL OR l.price <= :maxPrice)
+        AND (:campusLocationId IS NULL OR l.campusLocation.id = :campusLocationId)
+        AND (:listingType IS NULL OR l.listingType = :listingType)
+        """,
+        countQuery = """
+        SELECT COUNT(l) FROM Listing l
+        WHERE l.status = 'active'
+        AND (:categoryId IS NULL OR l.category.id = :categoryId)
+        AND (:minPrice IS NULL OR l.price >= :minPrice)
+        AND (:maxPrice IS NULL OR l.price <= :maxPrice)
+        AND (:campusLocationId IS NULL OR l.campusLocation.id = :campusLocationId)
+        AND (:listingType IS NULL OR l.listingType = :listingType)
+        """)
+    Page<Listing> filterListings(
         @Param("categoryId") Long categoryId,
         @Param("minPrice") BigDecimal minPrice,
         @Param("maxPrice") BigDecimal maxPrice,
