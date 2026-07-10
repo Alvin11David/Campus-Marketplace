@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { useUnread } from "@/contexts/unread-context";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
