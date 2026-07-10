@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Store, Package, ArrowRight, Check, Sparkles, ChevronRight } from "lucide-react";
@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
-import { CAMPUS_LOCATIONS, apiPatch } from "@/lib/api";
+import { apiPatch, fetchLocations } from "@/lib/api";
+import type { CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Location", "Roles"];
@@ -22,7 +23,10 @@ export default function Onboarding() {
   );
   const [isProvider, setIsProvider] = useState(user?.is_provider ?? false);
   const [isSeller, setIsSeller] = useState(user?.is_seller ?? false);
+  const [locations, setLocations] = useState<CampusLocation[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => { fetchLocations().then(setLocations); }, []);
 
   const handleContinue = async () => {
     if (step === 0) {

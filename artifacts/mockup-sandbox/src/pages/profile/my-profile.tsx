@@ -175,11 +175,20 @@ export default function MyProfilePage() {
                   {initials || "U"}
                 </AvatarFallback>
               </Avatar>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
               <Button
                 size="icon"
                 variant="secondary"
                 className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow-md hover:shadow-lg transition-all"
                 title="Change photo"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPhoto}
               >
                 <Camera className="h-4 w-4" />
               </Button>
