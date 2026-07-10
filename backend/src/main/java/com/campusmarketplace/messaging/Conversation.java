@@ -41,6 +41,12 @@ public class Conversation {
     @Column(name = "last_message_at")
     private Instant lastMessageAt;
 
+    @Column(name = "initiator_archived", nullable = false)
+    private boolean initiatorArchived;
+
+    @Column(name = "recipient_archived", nullable = false)
+    private boolean recipientArchived;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -76,6 +82,10 @@ public class Conversation {
     public void setRecipient(User recipient) { this.recipient = recipient; }
     public Instant getLastMessageAt() { return lastMessageAt; }
     public void setLastMessageAt(Instant lastMessageAt) { this.lastMessageAt = lastMessageAt; }
+    public boolean isInitiatorArchived() { return initiatorArchived; }
+    public void setInitiatorArchived(boolean initiatorArchived) { this.initiatorArchived = initiatorArchived; }
+    public boolean isRecipientArchived() { return recipientArchived; }
+    public void setRecipientArchived(boolean recipientArchived) { this.recipientArchived = recipientArchived; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

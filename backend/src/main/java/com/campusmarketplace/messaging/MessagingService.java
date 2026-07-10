@@ -128,6 +128,36 @@ public class MessagingService {
     }
 
     @Transactional
+    public void archiveConversation(Long conversationId, User user) {
+        var conversation = conversationRepository.findByIdWithDetails(conversationId)
+            .orElseThrow(() -> ApiException.notFound("Conversation not found"));
+
+        if (conversation.getInitiator().getId().equals(user.getId())) {
+            conversation.setInitiatorArchived(true);
+        } else if (conversation.getRecipient().getId().equals(user.getId())) {
+            conversation.setRecipientArchived(true);
+        } else {
+            throw ApiException.forbidden("You are not a participant in this conversation");
+        }
+        conversationRepository.save(conversation);
+    }
+
+    @Transactional
+    public void restoreConversation(Long conversationId, User user) {
+        var conversation = conversationRepository.findByIdWithDetails(conversationId)
+            .orElseThrow(() -> ApiException.notFound("Conversation not found"));
+
+        if (conversation.getInitiator().getId().equals(user.getId())) {
+            conversation.setInitiatorArchived(false);
+        } else if (conversation.getRecipient().getId().equals(user.getId())) {
+            conversation.setRecipientArchived(false);
+        } else {
+            throw ApiException.forbidden("You are not a participant in this conversation");
+        }
+        conversationRepository.save(conversation);
+    }
+
+    @Transactional
     public void deleteConversation(Long conversationId, User user) {
         var conversation = conversationRepository.findByIdWithDetails(conversationId)
             .orElseThrow(() -> ApiException.notFound("Conversation not found"));

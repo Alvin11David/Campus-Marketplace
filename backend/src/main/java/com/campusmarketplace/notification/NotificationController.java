@@ -26,13 +26,18 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<PageResponse<Notification>> getNotifications(
         @CurrentUser User user,
+        @RequestParam(defaultValue = "false") boolean archived,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int pageSize) {
+        @RequestParam(defaultValue = "50") int pageSize) {
         var pageable = PageRequest.of(page, pageSize);
-        var notifPage = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
-        long unreadCount = notificationRepository.countUnreadByUserId(user.getId());
+        var notifPage = notificationRepository.findByUserIdAndIsArchivedOrderByCreatedAtDesc(user.getId(), archived, pageable);
         var response = PageResponse.from(notifPage, notifPage.getContent(), null);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Long> getUnreadCount(@CurrentUser User user) {
+        return ResponseEntity.ok(notificationRepository.countUnreadByUserId(user.getId()));
     }
 
     @PostMapping("/{id}/mark-read")
@@ -53,9 +58,28 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/unread-count")
-    public ResponseEntity<Long> getUnreadCount(@CurrentUser User user) {
-        return ResponseEntity.ok(notificationRepository.countUnreadByUserId(user.getId()));
+    @PostMapping("/{id}/archive")
+    public ResponseEntity<Void> archiveNotification(@PathVariable Long id, @CurrentUser User user) {
+        var notification = notificationRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+        if (!notification.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+        notification.setArchived(true);
+        notificationRepository.save(notification);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/restore")
+    public ResponseEntity<Void> restoreNotification(@PathVariable Long id, @CurrentUser User user) {
+        var notification = notificationRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+        if (!notification.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+        notification.setArchived(false);
+        notificationRepository.save(notification);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
