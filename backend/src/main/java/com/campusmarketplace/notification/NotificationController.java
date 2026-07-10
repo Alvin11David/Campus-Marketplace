@@ -6,6 +6,7 @@ import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +55,7 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @Transactional
     @PostMapping("/mark-all-read")
     public ResponseEntity<Void> markAllAsRead(@CurrentUser User user) {
         notificationRepository.markAllAsRead(user.getId());

@@ -1,9 +1,29 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, MessageSquare, Star, ChevronLeft, ChevronRight, Send, ShoppingBag, Wrench, ArrowRight, Pencil, Trash2, Flag, BadgeCheck } from "lucide-react";
+import {
+  MapPin,
+  MessageSquare,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Send,
+  ShoppingBag,
+  Wrench,
+  ArrowRight,
+  Pencil,
+  Trash2,
+  Flag,
+  BadgeCheck,
+} from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,12 +31,28 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { StarRating } from "@/components/shared/star-rating";
 import { ReportDialog } from "@/components/shared/report-dialog";
 import { ListingCard } from "@/components/shared/listing-card";
 import { useAuth } from "@/contexts/auth-context";
-import { apiGet, apiPost, apiPatch, apiDelete, mapListing, mapReview, type Review } from "@/lib/api";
+import {
+  apiGet,
+  apiPost,
+  apiPatch,
+  apiDelete,
+  mapListing,
+  mapReview,
+  type Review,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -69,21 +105,33 @@ export default function ListingDetailPage() {
       apiGet<any>("/listings/" + id).then((data) => {
         if (!cancelled) setListing(mapListing(data));
       }),
-      apiGet<any>("/listings/" + id + "/reviews?page=0&pageSize=50").then((data) => {
-        if (!cancelled) setReviews((data.content ?? []).map(mapReview));
-      }),
+      apiGet<any>("/listings/" + id + "/reviews?page=0&pageSize=50").then(
+        (data) => {
+          if (!cancelled) setReviews((data.content ?? []).map(mapReview));
+        },
+      ),
     ])
-      .catch(() => { if (!cancelled) setNotFound(true); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {
     if (!listing) return;
-    apiGet<any>("/listings?categoryId=" + listing.category_id + "&page=0&pageSize=3")
+    apiGet<any>(
+      "/listings?categoryId=" + listing.category_id + "&page=0&pageSize=3",
+    )
       .then((data) => {
-        const list = (data.results ?? []).map(mapListing).filter((l: any) => l.id !== listing.id);
+        const list = (data.results ?? [])
+          .map(mapListing)
+          .filter((l: any) => l.id !== listing.id);
         setRelatedListings(list);
       })
       .catch(() => {});
@@ -104,8 +152,12 @@ export default function ListingDetailPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-2">Listing Not Found</h1>
-        <p className="text-muted-foreground mb-6">The listing you're looking for doesn't exist or has been removed.</p>
-        <Button asChild><Link to="/my-listings">Back to My Listings</Link></Button>
+        <p className="text-muted-foreground mb-6">
+          The listing you're looking for doesn't exist or has been removed.
+        </p>
+        <Button asChild>
+          <Link to="/my-listings">Back to My Listings</Link>
+        </Button>
       </div>
     );
   }
@@ -121,7 +173,11 @@ export default function ListingDetailPage() {
   const handleSubmitReview = async () => {
     setSubmittingReview(true);
     try {
-      const created = await apiPost<any>("/reviews", { listingId: Number(id), rating: reviewRating, comment: reviewComment || null });
+      const created = await apiPost<any>("/reviews", {
+        listingId: Number(id),
+        rating: reviewRating,
+        comment: reviewComment || null,
+      });
       setReviews((prev) => [mapReview(created), ...prev]);
       toast.success("Review submitted");
     } catch (e: any) {
@@ -144,8 +200,13 @@ export default function ListingDetailPage() {
     if (!editingReview) return;
     setSubmittingReview(true);
     try {
-      const updated = await apiPatch<any>("/reviews/" + editingReview.id, { rating: editRating, comment: editComment || null });
-      setReviews((prev) => prev.map((r) => (r.id === editingReview.id ? mapReview(updated) : r)));
+      const updated = await apiPatch<any>("/reviews/" + editingReview.id, {
+        rating: editRating,
+        comment: editComment || null,
+      });
+      setReviews((prev) =>
+        prev.map((r) => (r.id === editingReview.id ? mapReview(updated) : r)),
+      );
       toast.success("Review updated");
     } catch (e: any) {
       toast.error(e.message);
@@ -168,9 +229,15 @@ export default function ListingDetailPage() {
   };
 
   const handleMessage = async () => {
-    if (!user) { navigate("/login"); return; }
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     try {
-      const conv = await apiPost<any>("/conversations", { listingId: Number(id), initialMessage: "Hi, I'm interested in your listing!" });
+      const conv = await apiPost<any>("/conversations", {
+        listingId: Number(id),
+        initialMessage: "Hi, I'm interested in your listing!",
+      });
       navigate("/messages/" + conv.id);
     } catch {
       toast.error("Could not start conversation");
@@ -218,13 +285,21 @@ export default function ListingDetailPage() {
               {allImages.length > 1 && (
                 <>
                   <button
-                    onClick={() => setCurrentImageIndex((i) => (i === 0 ? allImages.length - 1 : i - 1))}
+                    onClick={() =>
+                      setCurrentImageIndex((i) =>
+                        i === 0 ? allImages.length - 1 : i - 1,
+                      )
+                    }
                     className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => setCurrentImageIndex((i) => (i === allImages.length - 1 ? 0 : i + 1))}
+                    onClick={() =>
+                      setCurrentImageIndex((i) =>
+                        i === allImages.length - 1 ? 0 : i + 1,
+                      )
+                    }
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -236,7 +311,9 @@ export default function ListingDetailPage() {
                         onClick={() => setCurrentImageIndex(i)}
                         className={cn(
                           "h-1.5 rounded-full transition-all",
-                          i === currentImageIndex ? "w-6 bg-primary" : "w-1.5 bg-background/60"
+                          i === currentImageIndex
+                            ? "w-6 bg-primary"
+                            : "w-1.5 bg-background/60",
                         )}
                       />
                     ))}
@@ -250,12 +327,22 @@ export default function ListingDetailPage() {
                 <div className="space-y-1">
                   <h1 className="text-2xl font-bold">{listing.title}</h1>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="border-primary/20">{listing.category.name}</Badge>
-                    <Badge variant="secondary" className="bg-secondary/10">
-                      {listing.listing_type === "service" ? "Service" : "Product"}
+                    <Badge variant="outline" className="border-primary/20">
+                      {listing.category.name}
                     </Badge>
-                    <span className={cn("inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold", statusColor[listing.status])}>
-                      {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
+                    <Badge variant="secondary" className="bg-secondary/10">
+                      {listing.listing_type === "service"
+                        ? "Service"
+                        : "Product"}
+                    </Badge>
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold",
+                        statusColor[listing.status],
+                      )}
+                    >
+                      {listing.status.charAt(0).toUpperCase() +
+                        listing.status.slice(1)}
                     </span>
                   </div>
                 </div>
@@ -263,11 +350,21 @@ export default function ListingDetailPage() {
                   <p className="text-3xl font-bold text-primary">
                     {Number(listing.price).toLocaleString()} {listing.currency}
                   </p>
-                  {listing.listing_type === "product" && listing.stock_quantity != null && (
-                    <p className={cn("text-sm mt-1", listing.stock_quantity > 0 ? "text-emerald-600" : "text-destructive")}>
-                      {listing.stock_quantity > 0 ? `${listing.stock_quantity} in stock` : "Out of Stock"}
-                    </p>
-                  )}
+                  {listing.listing_type === "product" &&
+                    listing.stock_quantity != null && (
+                      <p
+                        className={cn(
+                          "text-sm mt-1",
+                          listing.stock_quantity > 0
+                            ? "text-emerald-600"
+                            : "text-destructive",
+                        )}
+                      >
+                        {listing.stock_quantity > 0
+                          ? `${listing.stock_quantity} in stock`
+                          : "Out of Stock"}
+                      </p>
+                    )}
                 </div>
               </div>
 
@@ -275,7 +372,8 @@ export default function ListingDetailPage() {
                 <div className="flex items-center gap-2">
                   <StarRating rating={listing.avg_rating} size="md" showValue />
                   <span className="text-sm text-muted-foreground">
-                    ({listing.rating_count} {listing.rating_count === 1 ? "review" : "reviews"})
+                    ({listing.rating_count}{" "}
+                    {listing.rating_count === 1 ? "review" : "reviews"})
                   </span>
                 </div>
               )}
@@ -306,11 +404,18 @@ export default function ListingDetailPage() {
                   variant="star"
                   title="No reviews yet"
                   description="Be the first to leave one!"
-                  action={!isOwner ? (
-                    <Button variant="outline" size="sm" className="gap-2" onClick={() => setReviewDialogOpen(true)}>
-                      <Star className="h-4 w-4" /> Write a Review
-                    </Button>
-                  ) : undefined}
+                  action={
+                    !isOwner ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => setReviewDialogOpen(true)}
+                      >
+                        <Star className="h-4 w-4" /> Write a Review
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : (
                 reviews.map((review, idx) => {
@@ -320,19 +425,27 @@ export default function ListingDetailPage() {
                       {idx > 0 && <Separator className="mb-4" />}
                       <div className="flex gap-4">
                         <Avatar className="h-10 w-10 ring-1 ring-border">
-                          <AvatarImage src={review.reviewer.profile_photo_url || undefined} />
+                          <AvatarImage
+                            src={review.reviewer.profile_photo_url || undefined}
+                          />
                           <AvatarFallback className="text-xs">
                             {getInitials(review.reviewer.full_name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">{review.reviewer.full_name}</span>
-                            <span className="text-xs text-muted-foreground">{formatDate(review.created_at)}</span>
+                            <span className="font-medium text-sm">
+                              {review.reviewer.full_name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDate(review.created_at)}
+                            </span>
                           </div>
                           <StarRating rating={review.rating} size="sm" />
                           {review.comment && (
-                            <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {review.comment}
+                            </p>
                           )}
                           <div className="flex items-center gap-2 mt-2">
                             <ReportDialog
@@ -340,7 +453,11 @@ export default function ListingDetailPage() {
                               targetId={review.id}
                               targetLabel={`Review by ${review.reviewer.full_name}`}
                               trigger={
-                                <Button variant="ghost" size="sm" className="gap-1 h-7 text-xs text-muted-foreground px-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="gap-1 h-7 text-xs text-muted-foreground px-1"
+                                >
                                   <Flag className="h-3 w-3" /> Report
                                 </Button>
                               }
@@ -373,11 +490,17 @@ export default function ListingDetailPage() {
                 })
               )}
 
-              {!isOwner && reviews.length > 0 && (
+              {!isOwner && (
                 <div className="pt-4">
-                  <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+                  <Dialog
+                    open={reviewDialogOpen}
+                    onOpenChange={setReviewDialogOpen}
+                  >
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="gap-2 active:scale-95 transition-transform">
+                      <Button
+                        variant="outline"
+                        className="gap-2 active:scale-95 transition-transform"
+                      >
                         <Star className="h-4 w-4" /> Leave a Review
                       </Button>
                     </DialogTrigger>
@@ -391,10 +514,17 @@ export default function ListingDetailPage() {
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Rating</label>
-                          <StarRating rating={reviewRating} size="lg" interactive onRate={setReviewRating} />
+                          <StarRating
+                            rating={reviewRating}
+                            size="lg"
+                            interactive
+                            onRate={setReviewRating}
+                          />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Comment (optional)</label>
+                          <label className="text-sm font-medium">
+                            Comment (optional)
+                          </label>
                           <Textarea
                             rows={3}
                             value={reviewComment}
@@ -407,7 +537,11 @@ export default function ListingDetailPage() {
                         <DialogClose asChild>
                           <Button variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button onClick={handleSubmitReview} disabled={submittingReview} className="gap-2">
+                        <Button
+                          onClick={handleSubmitReview}
+                          disabled={submittingReview}
+                          className="gap-2"
+                        >
                           <Send className="h-4 w-4" />
                           {submittingReview ? "Submitting..." : "Submit Review"}
                         </Button>
@@ -429,18 +563,28 @@ export default function ListingDetailPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12 ring-2 ring-primary/10">
-                  <AvatarImage src={listing.owner.profile_photo_url || undefined} />
-                  <AvatarFallback>{getInitials(listing.owner.full_name)}</AvatarFallback>
+                  <AvatarImage
+                    src={listing.owner.profile_photo_url || undefined}
+                  />
+                  <AvatarFallback>
+                    {getInitials(listing.owner.full_name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="font-semibold text-sm">{listing.owner.full_name}</p>
+                    <p className="font-semibold text-sm">
+                      {listing.owner.full_name}
+                    </p>
                     {listing.owner.is_verified && (
                       <BadgeCheck className="h-4 w-4 text-emerald-600" />
                     )}
                   </div>
                   {listing.owner.avg_rating != null && (
-                    <StarRating rating={listing.owner.avg_rating} size="sm" showValue />
+                    <StarRating
+                      rating={listing.owner.avg_rating}
+                      size="sm"
+                      showValue
+                    />
                   )}
                 </div>
               </div>
@@ -453,7 +597,11 @@ export default function ListingDetailPage() {
                   targetId={listing.owner.id}
                   targetLabel={`User: ${listing.owner.full_name}`}
                   trigger={
-                    <Button variant="ghost" size="sm" className="w-full gap-1.5 text-xs text-muted-foreground">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs text-muted-foreground"
+                    >
                       <Flag className="h-3.5 w-3.5" /> Report User
                     </Button>
                   }
@@ -492,7 +640,9 @@ export default function ListingDetailPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Related Listings</h2>
             <Button variant="ghost" size="sm" className="gap-1 text-xs" asChild>
-              <Link to={`/search?q=${encodeURIComponent(listing.category.name)}`}>
+              <Link
+                to={`/search?q=${encodeURIComponent(listing.category.name)}`}
+              >
                 View All <ArrowRight className="h-3 w-3" />
               </Link>
             </Button>
@@ -510,12 +660,19 @@ export default function ListingDetailPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Review</DialogTitle>
-            <DialogDescription>Update your rating and comment</DialogDescription>
+            <DialogDescription>
+              Update your rating and comment
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Rating</label>
-              <StarRating rating={editRating} size="lg" interactive onRate={setEditRating} />
+              <StarRating
+                rating={editRating}
+                size="lg"
+                interactive
+                onRate={setEditRating}
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Comment (optional)</label>
@@ -539,12 +696,18 @@ export default function ListingDetailPage() {
       </Dialog>
 
       {/* Delete Review Dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => {
+          if (!o) setDeleteTarget(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Review</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete your review? This action cannot be undone.
+              Are you sure you want to delete your review? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-3 pt-4">
