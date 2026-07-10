@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Package, Star, MessageSquare, AlertTriangle, Save, Store, ShieldAlert, List, MapPin, Phone, User, BadgeCheck } from "lucide-react";
+import { Camera, Loader2, Package, Star, MessageSquare, AlertTriangle, Save, Store, ShieldAlert, List, MapPin, Phone, User, BadgeCheck } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
 import { toast } from "sonner";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -175,6 +175,11 @@ export default function MyProfilePage() {
                   {initials || "U"}
                 </AvatarFallback>
               </Avatar>
+              {uploadingPhoto && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70 backdrop-blur-[1px]">
+                  <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                </div>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
