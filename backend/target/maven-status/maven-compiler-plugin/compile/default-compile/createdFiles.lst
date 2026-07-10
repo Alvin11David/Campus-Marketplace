@@ -59,6 +59,7 @@ com\campusmarketplace\user\PasswordResetTokenRepository.class
 com\campusmarketplace\user\User.class
 com\campusmarketplace\messaging\dto\StartConversationRequest.class
 com\campusmarketplace\moderation\AdminActionLogRepository.class
+com\campusmarketplace\category\dto\UpdateCategoryRequest.class
 com\campusmarketplace\moderation\AdminActionLog.class
 com\campusmarketplace\listing\ListingController.class
 com\campusmarketplace\user\PasswordResetToken.class
