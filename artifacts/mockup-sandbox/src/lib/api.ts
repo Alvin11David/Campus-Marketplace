@@ -308,12 +308,25 @@ export function mapReport(data: any): Report {
   };
 }
 
-export const CAMPUS_LOCATIONS = [
-  { id: 1, name: "Main Campus", zone: "central" },
-  { id: 2, name: "Annex", zone: "north" },
-  { id: 3, name: "Hostel Area A", zone: "south" },
-  { id: 4, name: "Hostel Area B", zone: "south" },
-];
+export interface CampusLocation {
+  id: number;
+  name: string;
+  zone: string;
+}
+
+export async function fetchLocations(): Promise<CampusLocation[]> {
+  try {
+    const res = await fetch(`${API_BASE}/locations`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+export const CAMPUS_LOCATIONS: CampusLocation[] = [];
 
 export const CATEGORY_ICONS: Record<string, string> = {
   "Printing & Photocopying": "Printer",

@@ -224,4 +224,13 @@ public class UserService {
         user.setActive(false);
         userRepository.save(user);
     }
+
+    @Transactional
+    public UserProfileResponse updatePhoto(User currentUser, String photoUrl) {
+        var user = userRepository.findById(currentUser.getId())
+            .orElseThrow(() -> ApiException.notFound("User not found"));
+        user.setProfilePhotoUrl(photoUrl);
+        user = userRepository.save(user);
+        return UserProfileResponse.from(user);
+    }
 }
