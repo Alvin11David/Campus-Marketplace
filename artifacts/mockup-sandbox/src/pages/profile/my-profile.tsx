@@ -20,7 +20,8 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { StarRating } from "@/components/shared/star-rating";
 import { StaggerFade, StaggerItem } from "@/components/shared/stagger-fade";
 import { useAuth } from "@/contexts/auth-context";
-import { CAMPUS_LOCATIONS, apiPatch, apiPost } from "@/lib/api";
+import { apiPatch, apiPost, fetchLocations } from "@/lib/api";
+import type { CampusLocation } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 function ProfileSkeleton() {
@@ -39,6 +40,7 @@ export default function MyProfilePage() {
   const { user, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
 
+  const [locations, setLocations] = useState<CampusLocation[]>([]);
   const [form, setForm] = useState({
     full_name: user?.full_name || "",
     bio: user?.bio || "",
@@ -116,6 +118,8 @@ export default function MyProfilePage() {
       setSaving(false);
     }
   };
+
+  useEffect(() => { fetchLocations().then(setLocations); }, []);
 
   if (!user) return null;
 
@@ -247,7 +251,7 @@ export default function MyProfilePage() {
                 <SelectValue placeholder="Select a campus location" />
               </SelectTrigger>
               <SelectContent>
-                {CAMPUS_LOCATIONS.map((loc) => (
+                {locations.map((loc) => (
                   <SelectItem key={loc.id} value={loc.id.toString()}>
                     {loc.name}
                   </SelectItem>
