@@ -1,6 +1,7 @@
 package com.campusmarketplace.email;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -74,8 +75,9 @@ public class EmailService {
             String html = buildWelcomeHtml(fullName);
             helper.setText(html, true);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
             System.err.println("Failed to send welcome email to " + to + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -91,8 +93,9 @@ public class EmailService {
             String html = buildOtpHtml(fullName, otp);
             helper.setText(html, true);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
             System.err.println("Failed to send OTP email to " + to + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
