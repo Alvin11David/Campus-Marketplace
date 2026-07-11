@@ -6,11 +6,15 @@ import com.campusmarketplace.notification.NotificationService;
 import com.campusmarketplace.review.ReviewRepository;
 import com.campusmarketplace.user.User;
 import com.campusmarketplace.user.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ModerationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ModerationService.class);
 
     private final ReportRepository reportRepository;
     private final AdminActionLogRepository adminActionLogRepository;
@@ -34,8 +38,11 @@ public class ModerationService {
     @Transactional
     public Report submitReport(User reporter, String targetType, Long targetId,
                                String reason, String description) {
+        log.info("Submitting report reporterId={}, targetType={}, targetId={}, reason={}", reporter != null ? reporter.getId() : null, targetType, targetId, reason);
         long openReports = reportRepository.countOpenReports(reporter.getId(), targetType, targetId);
+        log.info("Open report count for target: {}", openReports);
         if (openReports >= 3) {
+            log.warn("Blocking report submission due to too many open reports reporterId={}, targetType={}, targetId={}", reporter.getId(), targetType, targetId);
             throw ApiException.badRequest("You have too many open reports on this target");
         }
 
@@ -45,7 +52,9 @@ public class ModerationService {
         report.setTargetId(targetId);
         report.setReason(reason);
         report.setDescription(description);
-        return reportRepository.save(report);
+        var saved = reportRepository.save(report);
+        log.info("Saved report successfully with id={}", saved.getId());
+        return saved;
     }
 
     @Transactional
