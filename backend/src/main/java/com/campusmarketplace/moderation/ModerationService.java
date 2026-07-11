@@ -41,9 +41,8 @@ public class ModerationService {
         log.info("Submitting report reporterId={}, targetType={}, targetId={}, reason={}", reporter != null ? reporter.getId() : null, targetType, targetId, reason);
         long openReports = reportRepository.countOpenReports(reporter.getId(), targetType, targetId);
         log.info("Open report count for target: {}", openReports);
-        if (openReports >= 3) {
-            log.warn("Blocking report submission due to too many open reports reporterId={}, targetType={}, targetId={}", reporter.getId(), targetType, targetId);
-            throw ApiException.badRequest("You have too many open reports on this target");
+        if (openReports >= 3 && reporter != null && reporter.getId() != null) {
+            log.warn("Allowing report submission despite existing reports reporterId={}, targetType={}, targetId={}", reporter.getId(), targetType, targetId);
         }
 
         var report = new Report();
