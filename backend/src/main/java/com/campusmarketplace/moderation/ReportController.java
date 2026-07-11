@@ -1,5 +1,6 @@
 package com.campusmarketplace.moderation;
 
+import com.campusmarketplace.moderation.dto.ReportResponse;
 import com.campusmarketplace.security.CurrentUser;
 import com.campusmarketplace.user.User;
 import java.util.Map;
@@ -21,14 +22,14 @@ public class ReportController {
     }
 
     @PostMapping
-    public ResponseEntity<Report> submitReport(@CurrentUser User user,
-                                                @RequestBody Map<String, Object> body) {
+    public ResponseEntity<ReportResponse> submitReport(@CurrentUser User user,
+                                                       @RequestBody Map<String, Object> body) {
         var report = moderationService.submitReport(
             user,
             (String) body.get("target_type"),
             Long.valueOf(body.get("target_id").toString()),
             (String) body.get("reason"),
             (String) body.get("description"));
-        return ResponseEntity.status(HttpStatus.CREATED).body(report);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ReportResponse.from(report));
     }
 }
