@@ -79,9 +79,7 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         var mainCampus = campusLocationRepository.save(new CampusLocation("Main Campus", "central"));
-        var annex = campusLocationRepository.save(new CampusLocation("Annex", "north"));
-        var hostelA = campusLocationRepository.save(new CampusLocation("Hostel Area A", "south"));
-        var hostelB = campusLocationRepository.save(new CampusLocation("Hostel Area B", "south"));
+        var marketPlaza = campusLocationRepository.save(new CampusLocation("Market Plaza", "north"));
 
         var tutoring = categoryRepository.save(new Category("Tutoring", "tutoring", "service", "book-open"));
         tutoring.setDescription("Academic tutoring and private lessons");
@@ -104,9 +102,9 @@ public class DataSeeder implements CommandLineRunner {
         var seller = userRepository.save(createUser("seller@test.com", "Grace Nakato",
             "+256700000003", mainCampus, false, false, true, true, true, false));
         var buyer = userRepository.save(createUser("buyer@test.com", "John Okello",
-            "+256700000004", hostelA, false, false, false, true, true, false));
+            "+256700000004", mainCampus, false, false, false, true, true, false));
         var suspendedUser = userRepository.save(createUser("suspended@test.com", "Suspended User",
-            "+256700000005", hostelB, false, false, false, true, true, true));
+            "+256700000005", mainCampus, false, false, false, true, true, true));
 
         var listing1 = listingRepository.save(createListing(provider, tutoring, "service",
             "Experienced Math Tutor", "I offer math tutoring for university-level courses including Calculus, Linear Algebra, and Statistics. Available for both online and in-person sessions.",
@@ -121,7 +119,7 @@ public class DataSeeder implements CommandLineRunner {
 
         var listing3 = listingRepository.save(createListing(provider, tutoring, "service",
             "Graphic Design Lessons", "Learn Adobe Photoshop, Illustrator and Figma from a professional designer. Beginner to advanced levels.",
-            new BigDecimal("40000"), hostelA, "active"));
+            new BigDecimal("40000"), marketPlaza, "active"));
         listingImageRepository.save(new ListingImage(listing3, "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600", 0));
 
         var listing4 = listingRepository.save(createListing(seller, campusProducts, "product",
@@ -132,7 +130,7 @@ public class DataSeeder implements CommandLineRunner {
 
         var listing5 = listingRepository.save(createListing(provider, hairBeauty, "service",
             "Haircut & Styling", "Professional haircut, braiding and styling services at affordable student rates. Walk-ins welcome on weekdays.",
-            new BigDecimal("25000"), annex, "active"));
+            new BigDecimal("25000"), marketPlaza, "active"));
         listingImageRepository.save(new ListingImage(listing5, "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600", 0));
 
         var listing6 = listingRepository.save(createListing(seller, campusProducts, "product",
