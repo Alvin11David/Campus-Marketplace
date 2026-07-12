@@ -53,6 +53,7 @@ com\campusmarketplace\user\UserService.class
 com\campusmarketplace\security\UserDetailsServiceImpl.class
 com\campusmarketplace\CampusMarketplaceApplication.class
 com\campusmarketplace\category\CategoryController.class
+com\campusmarketplace\moderation\dto\ReportResponse.class
 com\campusmarketplace\email\EmailService.class
 com\campusmarketplace\common\GlobalExceptionHandler.class
 com\campusmarketplace\messaging\MessageRepository.class

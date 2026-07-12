@@ -977,11 +977,11 @@ Every account is, by default, a **Seeker** (can browse, search, message, and rev
 | Column | Type | Constraints |
 |---|---|---|
 | id | BIGINT | PRIMARY KEY, AUTO INCREMENT |
-| name | VARCHAR(100) | UNIQUE, NOT NULL (e.g., "Main Campus", "Annex", "Hostel Area A") |
+| name | VARCHAR(100) | UNIQUE, NOT NULL (e.g., "Main Campus", "Annex", ) |
 | zone | VARCHAR(50) | NOT NULL (used for adjacency scoring, e.g., "central", "north", "south") |
 | is_active | BOOLEAN | DEFAULT TRUE |
 
-*Seed data: Main Campus (zone: central), Annex (zone: north), Hostel Area A (zone: south), Hostel Area B (zone: south). Zone adjacency (which zones count as "nearby" = 0.5 score) is a small fixed lookup defined in application code, not a database table, since it rarely changes — see Section 11.*
+*Seed data: Main Campus (zone: central), Annex (zone: north). Zone adjacency (which zones count as "nearby" = 0.5 score) is a small fixed lookup defined in application code, not a database table, since it rarely changes — see Section 11.*
 
 ## 6.3 Table: `categories`
 

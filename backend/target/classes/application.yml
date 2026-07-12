@@ -23,14 +23,17 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: alvin69david@gmail.com
-    password: vxal hjkz vcyo chun
+    username: waluube69alvin@gmail.com
+    password: wgxqehwaialddjal
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
@@ -61,7 +64,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-
 ---
 spring:
   config:
