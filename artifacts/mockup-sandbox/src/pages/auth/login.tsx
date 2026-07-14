@@ -26,7 +26,9 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard", { replace: true });
+      const stored = localStorage.getItem("cm_user");
+      const user = stored ? JSON.parse(stored) : null;
+      navigate(user?.is_admin ? "/admin-dashboard" : "/dashboard", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -45,7 +47,9 @@ export default function Login() {
   }, [lockedUntil]);
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    const stored = localStorage.getItem("cm_user");
+    const user = stored ? JSON.parse(stored) : null;
+    return <Navigate to={user?.is_admin ? "/admin-dashboard" : "/dashboard"} replace />;
   }
 
   const isLocked = lockedUntil && Date.now() < lockedUntil;
@@ -72,7 +76,9 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate("/dashboard", { replace: true });
+      const stored = localStorage.getItem("cm_user");
+      const loggedInUser = stored ? JSON.parse(stored) : null;
+      navigate(loggedInUser?.is_admin ? "/admin-dashboard" : "/dashboard", { replace: true });
     } catch {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
