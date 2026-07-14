@@ -18,4 +18,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     long countOpenReports(@Param("userId") Long userId, @Param("targetType") String targetType, @Param("targetId") Long targetId);
 
     List<Report> findTop5ByStatusOrderByCreatedAtAsc(String status);
+
+    long countByStatus(String status);
 }

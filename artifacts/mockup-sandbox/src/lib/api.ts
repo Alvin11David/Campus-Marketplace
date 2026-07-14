@@ -397,6 +397,38 @@ export function mapReport(data: any): Report {
   };
 }
 
+export interface AdminAnalytics {
+  total_users: number;
+  new_users_this_week: number;
+  total_active_listings: number;
+  total_messages_sent: number;
+  total_reviews_submitted: number;
+  platform_avg_rating: number;
+  pending_reports_count: number;
+  listings_by_category: { category: string; count: number }[];
+  service_product_split: { service: number; product: number };
+  top_providers: {
+    id: number;
+    full_name: string;
+    profile_photo_url: string | null;
+    avg_rating: number | null;
+    rating_count: number;
+    is_provider: boolean;
+    is_seller: boolean;
+    listing_count: number;
+  }[];
+  recent_admin_actions: {
+    id: number;
+    admin_name: string;
+    action: string;
+    target_type: string;
+    target_id: number;
+    notes: string | null;
+    created_at: string;
+  }[];
+  top_search_terms: { query: string; count: number }[];
+}
+
 export interface CampusLocation {
   id: number;
   name: string;

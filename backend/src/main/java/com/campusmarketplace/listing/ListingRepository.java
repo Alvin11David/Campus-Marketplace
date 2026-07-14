@@ -3,6 +3,7 @@ package com.campusmarketplace.listing;
 import com.campusmarketplace.category.Category;
 import com.campusmarketplace.location.CampusLocation;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -91,6 +92,15 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
 
     @Query("SELECT l.category.id AS categoryId, l.category.name AS categoryName, COUNT(l) AS listingCount FROM Listing l WHERE l.status = 'active' GROUP BY l.category.id, l.category.name ORDER BY l.category.name")
     List<CategoryListingCount> countActiveListingsByCategory();
+
+    @Query("SELECT l.listingType, COUNT(l) FROM Listing l WHERE l.status = 'active' GROUP BY l.listingType")
+    List<Object[]> countActiveByListingType();
+
+    @Query("SELECT COUNT(l) FROM Listing l WHERE l.status = 'active' AND l.createdAt BETWEEN :from AND :to")
+    long countActiveByCreatedAtBetween(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("SELECT COUNT(l) FROM Listing l WHERE l.owner.id = :ownerId AND l.status = 'active'")
+    long countActiveByOwnerId(@Param("ownerId") Long ownerId);
 
     @jakarta.transaction.Transactional
     @Modifying
