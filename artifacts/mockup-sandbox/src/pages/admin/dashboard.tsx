@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Users, ShoppingBag, MessageSquare, Star, Flag, BarChart3, TrendingUp, TrendingDown,
   UserPlus, ThumbsUp, AlertTriangle, Search, ShieldAlert, Ban, UserCheck, XCircle,
-  CheckCircle2, Layers, Package, ArrowRight, LayoutGrid, Sparkle, Activity,
+  CheckCircle2, Layers, Package, ArrowRight, Activity,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { apiGet, absoluteUrl } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
 import type { AdminAnalytics } from "@/lib/api";
@@ -49,6 +48,69 @@ function timeAgo(dateStr: string) {
   return `${days}d ago`;
 }
 
+const MOCK_METRICS = {
+  total_users: 34, total_active_listings: 22, pending_reports_count: 2,
+  total_messages_sent: 210, platform_avg_rating: 4.2, new_users_this_week: 5,
+  total_reviews_submitted: 18,
+};
+
+const MOCK_PIE = [
+  { name: "Services", value: 12 },
+  { name: "Products", value: 10 },
+];
+
+const MOCK_CATEGORIES = [
+  { category: "Printing & Photocopying", count: 4 },
+  { category: "Device Repair", count: 6 },
+  { category: "Tutoring", count: 5 },
+  { category: "Hair & Beauty", count: 3 },
+  { category: "Laundry & Event Planning", count: 2 },
+  { category: "Campus Products", count: 7 },
+];
+
+interface MetricCardProps {
+  label: string;
+  value: string | number;
+  icon: React.ElementType;
+  gradient: string;
+  iconBg: string;
+  iconColor: string;
+  trend: { value: number; positive: boolean };
+}
+
+function MetricCard({ label, value, icon: Icon, gradient, iconBg, iconColor, trend }: MetricCardProps) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className={`border-border/60 shadow-sm overflow-hidden ${gradient}`}>
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between">
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0", iconBg)}>
+              <Icon className={cn("h-5 w-5", iconColor)} />
+            </div>
+            <div className={cn(
+              "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+              trend.positive
+                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+                : "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+            )}>
+              {trend.positive ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
+              {trend.value}%
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-bold tracking-tight">{value}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -60,28 +122,44 @@ export default function AdminDashboard() {
       .catch(() => {});
   }, []);
 
+  const a = analytics ?? MOCK_METRICS;
+
   const chartData = useMemo(() => {
-    if (!analytics?.listings_by_category) return [];
-    return analytics.listings_by_category.map((d: any) => ({
-      category: d.category_name ?? d.category,
-      count: d.listing_count ?? d.count,
-    }));
+    if (analytics?.listings_by_category?.length) {
+      return analytics.listings_by_category.map((d: any) => ({
+        category: d.category_name ?? d.category,
+        count: d.listing_count ?? d.count,
+      }));
+    }
+    return MOCK_CATEGORIES;
   }, [analytics]);
 
   const pieData = useMemo(() => {
-    const split = analytics?.service_product_split;
-    if (!split) return [];
-    return [
-      { name: "Services", value: split.service ?? 0 },
-      { name: "Products", value: split.product ?? 0 },
-    ].filter((d) => d.value > 0);
+    if (analytics?.service_product_split) {
+      const split = analytics.service_product_split;
+      return [
+        { name: "Services", value: split.service ?? 0 },
+        { name: "Products", value: split.product ?? 0 },
+      ].filter((d) => d.value > 0);
+    }
+    return MOCK_PIE;
   }, [analytics]);
 
   const quickNav = [
-    { href: "/admin-dashboard/users", label: "Manage Users", icon: Users, desc: `${analytics?.total_users ?? 0} registered` },
-    { href: "/admin-dashboard/reports", label: "Moderation", icon: Flag, desc: `${analytics?.pending_reports_count ?? 0} pending` },
+    { href: "/admin-dashboard/users", label: "Manage Users", icon: Users, desc: `${(analytics?.total_users ?? MOCK_METRICS.total_users)} registered` },
+    { href: "/admin-dashboard/reports", label: "Moderation", icon: Flag, desc: `${(analytics?.pending_reports_count ?? MOCK_METRICS.pending_reports_count)} pending` },
     { href: "/admin-dashboard/analytics", label: "Analytics", icon: BarChart3, desc: "Detailed reports" },
     { href: "/admin-dashboard/categories", label: "Categories", icon: Layers, desc: "Manage listing types" },
+  ];
+
+  const metrics: MetricCardProps[] = [
+    { label: "Total Users", value: a.total_users, icon: Users, gradient: "bg-gradient-to-br from-blue-50/80 to-white dark:from-blue-950/20 dark:to-background", iconBg: "bg-blue-100 dark:bg-blue-900/50", iconColor: "text-blue-600 dark:text-blue-400", trend: { value: 21, positive: true } },
+    { label: "Active Listings", value: a.total_active_listings, icon: ShoppingBag, gradient: "bg-gradient-to-br from-emerald-50/80 to-white dark:from-emerald-950/20 dark:to-background", iconBg: "bg-emerald-100 dark:bg-emerald-900/50", iconColor: "text-emerald-600 dark:text-emerald-400", trend: { value: 8, positive: true } },
+    { label: "Pending Reports", value: a.pending_reports_count, icon: AlertTriangle, gradient: "bg-gradient-to-br from-red-50/80 to-white dark:from-red-950/20 dark:to-background", iconBg: "bg-red-100 dark:bg-red-900/50", iconColor: "text-red-600 dark:text-red-400", trend: { value: 0, positive: false } },
+    { label: "Messages Sent", value: a.total_messages_sent, icon: MessageSquare, gradient: "bg-gradient-to-br from-amber-50/80 to-white dark:from-amber-950/20 dark:to-background", iconBg: "bg-amber-100 dark:bg-amber-900/50", iconColor: "text-amber-600 dark:text-amber-400", trend: { value: 12, positive: true } },
+    { label: "Platform Rating", value: a.platform_avg_rating != null ? Number(a.platform_avg_rating).toFixed(1) : "—", icon: Star, gradient: "bg-gradient-to-br from-purple-50/80 to-white dark:from-purple-950/20 dark:to-background", iconBg: "bg-purple-100 dark:bg-purple-900/50", iconColor: "text-purple-600 dark:text-purple-400", trend: { value: 3, positive: true } },
+    { label: "New Users (Week)", value: a.new_users_this_week, icon: UserPlus, gradient: "bg-gradient-to-br from-cyan-50/80 to-white dark:from-cyan-950/20 dark:to-background", iconBg: "bg-cyan-100 dark:bg-cyan-900/50", iconColor: "text-cyan-600 dark:text-cyan-400", trend: { value: 15, positive: true } },
+    { label: "Total Reviews", value: a.total_reviews_submitted, icon: ThumbsUp, gradient: "bg-gradient-to-br from-pink-50/80 to-white dark:from-pink-950/20 dark:to-background", iconBg: "bg-pink-100 dark:bg-pink-900/50", iconColor: "text-pink-600 dark:text-pink-400", trend: { value: 5, positive: true } },
   ];
 
   return (
@@ -111,74 +189,20 @@ export default function AdminDashboard() {
         <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-destructive/15 to-transparent" />
       </section>
 
-      {/* ── Metrics Bento ── */}
+      {/* ── Metric Cards ── */}
       <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-16">
-        <div className="flex items-center gap-3 mb-7">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-destructive text-destructive-foreground shadow-sm">
-              <Activity className="h-3.5 w-3.5" />
-            </div>
-            <span className="text-sm font-semibold text-foreground">Platform Metrics</span>
-          </div>
-          <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-7">
+          {metrics.map((m) => (
+            <MetricCard key={m.label} {...m} />
+          ))}
         </div>
+      </section>
 
-        <div className="grid gap-5 md:grid-cols-4 3xl:grid-cols-8">
-          <div className="md:col-span-1 3xl:col-span-1 space-y-5">
-            <Card className="bg-gradient-to-br from-destructive/5 to-destructive/[0.02] border-destructive/10 shadow-sm">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-destructive/10">
-                    <AlertTriangle className="h-4 w-4 text-destructive" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Pending Reports</p>
-                    <p className="text-2xl font-bold">{analytics?.pending_reports_count ?? 0}</p>
-                  </div>
-                </div>
-                <Separator className="bg-border/50" />
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10">
-                    <Users className="h-4 w-4 text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total Users</p>
-                    <p className="text-2xl font-bold">{analytics?.total_users ?? 0}</p>
-                  </div>
-                </div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <UserPlus className="h-3 w-3 mr-1" />
-                  {analytics?.new_users_this_week ?? 0} new this week
-                </div>
-              </CardContent>
-            </Card>
+      {/* ── Charts Row ── */}
+      <section className="mx-auto max-w-7xl px-4 pb-10 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-16">
+        <div className="grid gap-6 lg:grid-cols-3">
 
-            {quickNav.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.href}
-                  onClick={() => navigate(item.href)}
-                  className="w-full text-left group"
-                >
-                  <Card className="border-border/60 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/5 shrink-0 group-hover:bg-primary/10 transition-colors">
-                        <Icon className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{item.label}</p>
-                        <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                    </CardContent>
-                  </Card>
-                </button>
-              );
-            })}
-          </div>
-
-          <Card className="md:col-span-2 3xl:col-span-4 border-border/60 shadow-sm">
+          <Card className="lg:col-span-2 border-border/60 shadow-sm">
             <CardHeader className="pb-0">
               <div className="flex items-center gap-2.5">
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10">
@@ -186,7 +210,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Listings by Category</CardTitle>
-                  <CardDescription>{analytics?.total_active_listings ?? 0} active listings</CardDescription>
+                  <CardDescription>{analytics?.total_active_listings ?? MOCK_METRICS.total_active_listings} active listings</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -205,7 +229,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <div className="md:col-span-1 3xl:col-span-1 space-y-5">
+          <div className="space-y-6">
             <Card className="border-border/60 shadow-sm">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2.5">
@@ -216,30 +240,29 @@ export default function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                {pieData.length > 0 ? (
-                  <div>
-                    <div className="h-36">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={4} dataKey="value">
-                            {pieData.map((_, i) => (<Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />))}
-                          </Pie>
-                          <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", background: "hsl(var(--popover))" }} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="flex justify-center gap-4 text-xs text-muted-foreground mt-1">
-                      {pieData.map((d, i) => (
+                <div>
+                  <div className="h-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={62} paddingAngle={4} dataKey="value">
+                          {pieData.map((_, i) => (<Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />))}
+                        </Pie>
+                        <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", background: "hsl(var(--popover))" }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex justify-center gap-6 text-xs text-muted-foreground">
+                    {pieData.map((d, i) => {
+                      const total = pieData.reduce((s, x) => s + x.value, 0);
+                      return (
                         <div key={d.name} className="flex items-center gap-1.5">
                           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PIE_COLORS[i] }} />
-                          {d.name}: {d.value}
+                          {d.name}: {Math.round((d.value / total) * 100)}% ({d.value})
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-6 text-center">No data</p>
-                )}
+                </div>
               </CardContent>
             </Card>
 
@@ -249,30 +272,25 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500/10">
                     <Star className="h-4 w-4 text-purple-500" />
                   </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold">Rating</CardTitle>
-                    <CardDescription>Platform average</CardDescription>
-                  </div>
+                  <CardTitle className="text-sm font-semibold">Platform Rating</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-4xl font-bold text-foreground">
-                  {analytics?.platform_avg_rating != null ? Number(analytics.platform_avg_rating).toFixed(1) : "—"}
-                </p>
-                <div className="flex items-center justify-center gap-0.5 mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={cn(
-                        "h-3.5 w-3.5",
-                        analytics && star <= Math.round(Number(analytics.platform_avg_rating))
-                          ? "text-amber-400 fill-amber-400"
-                          : "text-muted-foreground/30"
-                      )}
-                    />
-                  ))}
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{analytics?.platform_avg_rating != null ? Number(analytics.platform_avg_rating).toFixed(1) : MOCK_METRICS.platform_avg_rating.toFixed(1)}</p>
+                    <p className="text-xs text-muted-foreground">avg rating</p>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const filled = star <= Math.round(analytics?.platform_avg_rating ?? MOCK_METRICS.platform_avg_rating);
+                        return <Star key={star} className={cn("h-4 w-4", filled ? "text-amber-400 fill-amber-400" : "text-muted-foreground/25")} />;
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{analytics?.total_reviews_submitted ?? MOCK_METRICS.total_reviews_submitted} reviews</p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1.5">{analytics?.total_reviews_submitted ?? 0} reviews</p>
               </CardContent>
             </Card>
           </div>
