@@ -1,0 +1,74 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/campusmarketplace}
+    driver-class-name: org.postgresql.Driver
+    username: ${PGUSERNAME:${DB_USERNAME:postgres}}
+    password: ${PGPASSWORD:${DB_PASSWORD:}}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:campus-marketplace-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256}
+    access-token-expiration: 900000
+    refresh-token-expiration: 604800000
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
+
+server:
+  port: ${PORT:8080}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:h2:mem:campusmarketplace
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  h2:
+    console:
+      enabled: false
