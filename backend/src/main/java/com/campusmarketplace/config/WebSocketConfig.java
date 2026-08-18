@@ -1,7 +1,7 @@
 package com.campusmarketplace.config;
 
 import com.campusmarketplace.security.JwtTokenProvider;
-import com.campusmarketplace.user.UserDetailsServiceImpl;
+import com.campusmarketplace.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

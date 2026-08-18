@@ -1,7 +1,7 @@
 package com.campusmarketplace.config;
 
 import com.campusmarketplace.security.JwtTokenProvider;
-import com.campusmarketplace.user.UserDetailsServiceImpl;
+import com.campusmarketplace.security.UserDetailsServiceImpl;
 import java.security.Principal;
 import java.util.Map;
 import org.springframework.http.server.ServerHttpRequest;
