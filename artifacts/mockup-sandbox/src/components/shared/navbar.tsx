@@ -62,7 +62,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-transparent bg-background/60 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/30 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent">
-      <div className="flex h-16 items-center gap-4 px-4 md:px-6">
+      <div className="flex h-16 items-center gap-2 px-4 md:px-6 flex-nowrap">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden shrink-0">
@@ -71,7 +71,6 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0">
             <div className="flex flex-col h-full">
-              {/* User card at top */}
               <div className="bg-gradient-to-br from-primary/5 to-secondary/5 p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <Avatar className="h-12 w-12 ring-2 ring-primary/30">
@@ -83,14 +82,12 @@ export function Navbar() {
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                   </div>
                 </div>
-                {(user?.is_provider || user?.is_seller) && (
-                  <Button size="sm" className="w-full gap-2 shadow-lg shadow-primary/20" asChild>
-                    <Link to="/listings/new" onClick={() => {}}>
-                      <PlusCircle className="h-4 w-4" />
-                      New Listing
-                    </Link>
-                  </Button>
-                )}
+                <Button size="sm" className="w-full gap-2 shadow-lg shadow-primary/20" asChild>
+                  <Link to="/listings/new">
+                    <PlusCircle className="h-4 w-4" />
+                    New Listing
+                  </Link>
+                </Button>
               </div>
 
               <nav className="flex-1 flex flex-col gap-1 p-4">
@@ -137,7 +134,7 @@ export function Navbar() {
           <span className="hidden sm:inline font-bold text-lg tracking-tight">CampusMarket</span>
         </Link>
 
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4 3xl:max-w-xl 4xl:max-w-2xl">
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 min-w-0 max-w-md mx-4">
           <div className="relative w-full group">
             <Search className={cn(
               "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-all duration-300",
@@ -159,7 +156,7 @@ export function Navbar() {
           </div>
         </form>
 
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="flex items-center gap-1 shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -169,7 +166,7 @@ export function Navbar() {
             {mobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
           </Button>
 
-          <Button variant="ghost" size="icon" asChild className="relative transition-all duration-200 hover:scale-110 active:scale-95 hover:bg-accent/50">
+          <Button variant="ghost" size="icon" asChild className="relative shrink-0">
             <Link to="/messages">
               <MessageSquare className="h-5 w-5" />
               {totalUnread > 0 && (
@@ -180,7 +177,7 @@ export function Navbar() {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="icon" asChild className="relative transition-all duration-200 hover:scale-110 active:scale-95 hover:bg-accent/50">
+          <Button variant="ghost" size="icon" asChild className="relative shrink-0">
             <Link to="/notifications">
               <Bell className="h-5 w-5" />
               {unreadNotifications > 0 && (
@@ -191,24 +188,22 @@ export function Navbar() {
             </Link>
           </Button>
 
-          {(user?.is_provider || user?.is_seller) && (
-            <Button
-              variant="default"
-              size="sm"
-              className="hidden sm:flex gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200 active:scale-95"
-              asChild
-            >
-              <Link to="/listings/new">
-                <PlusCircle className="h-4 w-4" />
-                New Listing
-              </Link>
-            </Button>
-          )}
+          <Button
+            variant="default"
+            size="sm"
+            className="hidden sm:flex gap-2 shrink-0 shadow-lg shadow-primary/25"
+            asChild
+          >
+            <Link to="/listings/new">
+              <PlusCircle className="h-4 w-4" />
+              New Listing
+            </Link>
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full ml-1 transition-all duration-200 hover:scale-110 active:scale-95">
-                <Avatar className="h-8 w-8 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
+              <Button variant="ghost" size="icon" className="rounded-full ml-1 shrink-0">
+                <Avatar className="h-8 w-8 ring-2 ring-primary/20">
                   <AvatarImage src={user?.profile_photo_url || undefined} />
                   <AvatarFallback className="text-xs font-semibold">{initials || "U"}</AvatarFallback>
                 </Avatar>
