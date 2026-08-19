@@ -1,9 +1,11 @@
+import { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, MessageSquare, Eye, Wrench, Package, BadgeCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StarRating } from "./star-rating";
+import { prefetchListing } from "@/lib/listing-cache";
 import type { Listing } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -34,9 +36,14 @@ export function ListingCard({ listing, showStats = false, className, featured }:
     .split("")
     .reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
 
+  const handlePrefetch = useCallback(() => {
+    prefetchListing(listing.id);
+  }, [listing.id]);
+
   return (
     <Link to={`/listings/${listing.id}`}>
       <Card
+        onMouseEnter={handlePrefetch}
         className={cn(
           "overflow-hidden transition-all duration-300 group cursor-pointer",
           "hover:shadow-xl hover:-translate-y-0.5",
@@ -49,6 +56,7 @@ export function ListingCard({ listing, showStats = false, className, featured }:
             <img
               src={listing.primary_image_url}
               alt={listing.title}
+              loading="lazy"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (

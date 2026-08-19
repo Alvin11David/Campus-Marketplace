@@ -84,6 +84,7 @@ public class ListingService {
             .toList());
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<ListingResponse> searchListings(String query, Long categoryId,
                                                          BigDecimal minPrice, BigDecimal maxPrice,
                                                          Long campusLocationId, String listingType,
@@ -112,6 +113,7 @@ public class ListingService {
         return mapToListingPageResponse(listingPage, null);
     }
 
+    @Transactional(readOnly = true)
     public ListingResponse getListingDetail(Long id, User currentUser) {
         var listing = listingRepository.findByIdWithDetails(id)
             .orElseThrow(() -> ApiException.notFound("Listing not found"));
@@ -134,6 +136,7 @@ public class ListingService {
             .toList());
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<ListingResponse> getCategoryListings(Long categoryId, String sortBy,
                                                               int page, int pageSize) {
         Sort sort = resolveSort(sortBy);
@@ -142,6 +145,7 @@ public class ListingService {
         return mapToListingPageResponse(listingPage, null);
     }
 
+    @Transactional(readOnly = true)
     public List<ListingResponse> getMyListings(User owner) {
         var listings = listingRepository.findByOwnerId(owner.getId());
         return listings.stream().map(listing -> {
@@ -152,6 +156,7 @@ public class ListingService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ListingResponse> getUserListings(Long userId) {
         var listings = listingRepository.findByOwnerId(userId);
         return listings.stream().map(listing -> {
@@ -235,6 +240,7 @@ public class ListingService {
             .toList());
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<ListingResponse> getAllListings(String sortBy, int page, int pageSize) {
         Sort sort = resolveSort(sortBy);
         Pageable pageable = PageRequest.of(page, pageSize, sort);

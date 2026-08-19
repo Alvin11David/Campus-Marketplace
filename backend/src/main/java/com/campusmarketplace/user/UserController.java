@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,10 @@ public class UserController {
     }
 
     @GetMapping("/auth/me")
-    public ResponseEntity<UserProfileResponse> getMyProfile(@CurrentUser User user) {
+    public ResponseEntity<?> getMyProfile(@CurrentUser User user) {
+        if (user == null) {
+            return ResponseEntity.ok(Map.of("authenticated", false));
+        }
         return ResponseEntity.ok(userService.getMyProfile(user));
     }
 

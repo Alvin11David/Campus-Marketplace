@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   MapPin,
   MessageSquare,
@@ -44,6 +45,7 @@ import { StarRating } from "@/components/shared/star-rating";
 import { ReportDialog } from "@/components/shared/report-dialog";
 import { ListingCard } from "@/components/shared/listing-card";
 import { useAuth } from "@/contexts/auth-context";
+import { getCachedListing } from "@/lib/listing-cache";
 import {
   apiGet,
   apiPost,
@@ -77,12 +79,7 @@ export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const [listing, setListing] = useState<any>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [relatedListings, setRelatedListings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const queryClient = useQueryClient();
 
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
@@ -95,47 +92,39 @@ export default function ListingDetailPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Review | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    let cancelled = false;
-    setLoading(true);
-    setNotFound(false);
+  const cachedListing = id ? getCachedListing(id) : null;
 
-    Promise.all([
-      apiGet<any>("/listings/" + id).then((data) => {
-        if (!cancelled) setListing(mapListing(data));
-      }),
-      apiGet<any>("/listings/" + id + "/reviews?page=0&pageSize=50").then(
-        (data) => {
-          if (!cancelled) setReviews((data.content ?? []).map(mapReview));
-        },
+  const { data: listing, isLoading: listingLoading, error: listingError } = useQuery<any>({
+    queryKey: ["listing", id],
+    queryFn: () => apiGet<any>("/listings/" + id).then(mapListing),
+    enabled: !!id && !cachedListing,
+    staleTime: 60_000,
+    placeholderData: cachedListing ?? undefined,
+  });
+
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery<Review[]>({
+    queryKey: ["reviews", id],
+    queryFn: () =>
+      apiGet<any>("/listings/" + id + "/reviews?page=0&pageSize=20").then(
+        (data) => (data.content ?? []).map(mapReview),
       ),
-    ])
-      .catch(() => {
-        if (!cancelled) setNotFound(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    enabled: !!id,
+    staleTime: 30_000,
+  });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+  const { data: relatedListings = [] } = useQuery<any[]>({
+    queryKey: ["related", id, listing?.category_id],
+    queryFn: () =>
+      apiGet<any>(
+        "/listings?categoryId=" + listing!.category_id + "&page=0&pageSize=3",
+      ).then((data) =>
+        (data.results ?? []).map(mapListing).filter((l: any) => l.id !== listing!.id),
+      ),
+    enabled: !!listing?.category_id,
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    if (!listing) return;
-    apiGet<any>(
-      "/listings?categoryId=" + listing.category_id + "&page=0&pageSize=3",
-    )
-      .then((data) => {
-        const list = (data.results ?? [])
-          .map(mapListing)
-          .filter((l: any) => l.id !== listing.id);
-        setRelatedListings(list);
-      })
-      .catch(() => {});
-  }, [listing]);
+  const loading = listingLoading || reviewsLoading;
 
   if (loading) {
     return (
@@ -148,7 +137,7 @@ export default function ListingDetailPage() {
     );
   }
 
-  if (notFound || !listing) {
+  if (listingError || !listing) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-2">Listing Not Found</h1>
@@ -178,7 +167,7 @@ export default function ListingDetailPage() {
         rating: reviewRating,
         comment: reviewComment || null,
       });
-      setReviews((prev) => [mapReview(created), ...prev]);
+      queryClient.setQueryData<Review[]>(["reviews", id], (prev) => [mapReview(created), ...(prev ?? [])]);
       toast.success("Review submitted");
     } catch (e: any) {
       toast.error(e.message);
@@ -204,8 +193,8 @@ export default function ListingDetailPage() {
         rating: editRating,
         comment: editComment || null,
       });
-      setReviews((prev) =>
-        prev.map((r) => (r.id === editingReview.id ? mapReview(updated) : r)),
+      queryClient.setQueryData<Review[]>(["reviews", id], (prev) =>
+        (prev ?? []).map((r) => (r.id === editingReview.id ? mapReview(updated) : r)),
       );
       toast.success("Review updated");
     } catch (e: any) {
@@ -220,7 +209,9 @@ export default function ListingDetailPage() {
     if (!deleteTarget) return;
     try {
       await apiDelete("/reviews/" + deleteTarget.id);
-      setReviews((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+      queryClient.setQueryData<Review[]>(["reviews", id], (prev) =>
+        (prev ?? []).filter((r) => r.id !== deleteTarget.id),
+      );
       toast.success("Review deleted");
     } catch (e: any) {
       toast.error(e.message);
@@ -268,6 +259,7 @@ export default function ListingDetailPage() {
                     transition={{ duration: 0.3 }}
                     src={allImages[currentImageIndex]}
                     alt={listing.title}
+                    loading={currentImageIndex === 0 ? "eager" : "lazy"}
                     className="h-full w-full object-cover"
                   />
                 ) : (

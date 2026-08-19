@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Printer, Wrench, BookOpen, Scissors, Sparkles, Package } from "lucide-react";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { Printer, Wrench, BookOpen, Scissors, Sparkles, Package, Loader2 } from "lucide-react";
 import { CartoonEmpty } from "@/components/shared/cartoon-empty";
 import { BackButton } from "@/components/shared/back-button";
 import { Button } from "@/components/ui/button";
@@ -55,54 +56,63 @@ function CategoryPageSkeleton() {
   );
 }
 
+const PAGE_SIZE = 20;
+
+function buildListingsParams(catId: number, filters: Filters, page: number) {
+  const params = new URLSearchParams();
+  params.set("categoryId", String(catId));
+  params.set("page", String(page));
+  params.set("pageSize", String(PAGE_SIZE));
+  if (filters.minPrice) params.set("minPrice", filters.minPrice);
+  if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+  if (filters.campusLocation && filters.campusLocation !== "all") {
+    params.set("campusLocationId", filters.campusLocation);
+  }
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  return params.toString();
+}
+
+function filterByRating(list: Listing[], minRating: string): Listing[] {
+  if (!minRating || minRating === "all") return list;
+  const minRat = Number.parseFloat(minRating);
+  if (Number.isNaN(minRat)) return list;
+  return list.filter((l) => l.avg_rating != null && l.avg_rating >= minRat);
+}
+
 export default function CategoryPage() {
   const { slug } = useParams<{ slug: string }>();
   const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [category, setCategory] = useState<Category | null>(null);
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [catError, setCatError] = useState(false);
 
-  useEffect(() => {
-    if (!slug) return;
-    setLoading(true);
-    setCatError(false);
+  const { data: category, isLoading: catLoading, error: catError } = useQuery<Category | null>({
+    queryKey: ["category", slug],
+    queryFn: () => apiGet<any>(`/categories/${slug}`).then(mapCategory),
+    enabled: !!slug,
+    staleTime: 60_000,
+  });
 
-    apiGet<any>(`/categories/${slug}`)
-      .then((catData) => {
-        const cat = mapCategory(catData);
-        setCategory(cat);
+  const {
+    data,
+    isLoading: listingsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["listings", "category", category?.id, filters],
+    queryFn: ({ pageParam = 0 }) =>
+      apiGet<any>(`/listings?${buildListingsParams(category!.id, filters, pageParam)}`).then((data) => ({
+        listings: filterByRating(((data as any)?.results ?? []).map(mapListing), filters.minRating),
+        nextPage: ((data as any)?.results ?? []).length >= PAGE_SIZE ? pageParam + 1 : undefined,
+      })),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    enabled: !!category,
+    staleTime: 30_000,
+  });
 
-        const params = new URLSearchParams();
-        params.set("categoryId", String(cat.id));
-        params.set("page", "0");
-        params.set("pageSize", "50");
-        if (filters.minPrice) params.set("minPrice", filters.minPrice);
-        if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
-        if (filters.campusLocation && filters.campusLocation !== "all") {
-          params.set("campusLocationId", filters.campusLocation);
-        }
-        if (filters.sortBy) params.set("sortBy", filters.sortBy);
-
-        return apiGet<any>(`/listings?${params.toString()}`);
-      })
-      .then((data) => {
-        let list: Listing[] = ((data as any)?.results ?? []).map(mapListing);
-        if (filters.minRating && filters.minRating !== "all") {
-          const minRat = Number.parseFloat(filters.minRating);
-          if (!Number.isNaN(minRat)) {
-            list = list.filter((l) => l.avg_rating != null && l.avg_rating >= minRat);
-          }
-        }
-        setListings(list);
-      })
-      .catch(() => {
-        setCategory(null);
-        setCatError(true);
-        setListings([]);
-      })
-      .finally(() => setLoading(false));
-  }, [slug, filters]);
+  const listings = useMemo(
+    () => data?.pages.flatMap((p) => p.listings) ?? [],
+    [data],
+  );
 
   const activeFilterCount = useMemo(
     () =>
@@ -110,6 +120,8 @@ export default function CategoryPage() {
         .length,
     [filters],
   );
+
+  const loading = catLoading || listingsLoading;
 
   if (catError) {
     return (
@@ -171,24 +183,42 @@ export default function CategoryPage() {
             action={<Button variant="outline" size="sm" asChild><Link to="/categories">Browse All Categories</Link></Button>}
           />
         ) : (
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
-          >
-            {listings.map((listing) => (
-              <motion.div
-                key={listing.id}
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-                }}
-              >
-                <ListingCard listing={listing} />
-              </motion.div>
-            ))}
-          </motion.div>
+          <>
+            <motion.div
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5"
+            >
+              {listings.map((listing) => (
+                <motion.div
+                  key={listing.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                  }}
+                >
+                  <ListingCard listing={listing} />
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="gap-2"
+                >
+                  {isFetchingNextPage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : null}
+                  {isFetchingNextPage ? "Loading..." : "Load More"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

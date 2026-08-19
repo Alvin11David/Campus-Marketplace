@@ -71,6 +71,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@tanstack/react-query": "catalog:",
     "react-router-dom": "^7.18.1",
     "sockjs-client": "^1.6.1",
     "stompjs": "^2.3.3",
