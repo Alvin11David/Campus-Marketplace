@@ -87,7 +87,7 @@ export default function CategoryPage() {
         return apiGet<any>(`/listings?${params.toString()}`);
       })
       .then((data) => {
-        let list: Listing[] = ((data as any)?.content ?? []).map(mapListing);
+        let list: Listing[] = ((data as any)?.results ?? []).map(mapListing);
         if (filters.minRating && filters.minRating !== "all") {
           const minRat = Number.parseFloat(filters.minRating);
           if (!Number.isNaN(minRat)) {

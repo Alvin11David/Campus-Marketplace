@@ -284,7 +284,7 @@ export default function Dashboard() {
               <Badge variant="secondary" className="text-[10px] bg-primary/5 text-primary border-primary/10 font-medium">Curated</Badge>
             </div>
             <Button variant="outline" size="sm" className="gap-1.5 text-xs border-border/60" asChild>
-              <Link to="/search">
+              <Link to="/categories">
                 View All <ArrowRight className="h-3 w-3" />
               </Link>
             </Button>
