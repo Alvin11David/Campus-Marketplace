@@ -54,7 +54,7 @@ backend/target/
 # Environment
 .env
 .env.*
-
+.claude
 # OS
 *.swp
 *.swo

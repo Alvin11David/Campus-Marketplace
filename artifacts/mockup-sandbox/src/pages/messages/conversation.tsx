@@ -257,7 +257,7 @@ export default function ConversationPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { refresh: refreshUnread } = useUnread();
-  const { subscribe, subscribeUser } = useWebSocketContext();
+  const { isConnected, subscribe, subscribeUser } = useWebSocketContext();
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -357,7 +357,7 @@ export default function ConversationPage() {
       unsubMessage();
       unsubEvents();
     };
-  }, [id, user?.id, subscribe, subscribeUser]);
+  }, [id, user?.id, subscribe, subscribeUser, isConnected]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -428,7 +428,10 @@ export default function ConversationPage() {
         ...mapMessage(created),
         conversation_id: Number(id),
       };
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
       setNewMessage("");
       setPendingFile(null);
       setReplyTo(null);

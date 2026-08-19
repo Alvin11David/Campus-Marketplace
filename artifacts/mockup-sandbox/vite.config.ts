@@ -15,6 +15,9 @@ if (Number.isNaN(port) || port <= 0) {
 const basePath = process.env.BASE_PATH || "/";
 
 export default defineConfig({
+  define: {
+    global: "globalThis",
+  },
   base: basePath,
   plugins: [
     mockupPreviewPlugin(),

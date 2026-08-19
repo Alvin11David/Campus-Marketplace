@@ -21,12 +21,15 @@ export function useWebSocket() {
     const token = localStorage.getItem("cm_token");
     if (!token || clientRef.current?.connected) return;
 
+    if (typeof global === "undefined") (window as any).global = window;
     import("sockjs-client").then(({ default: SockJS }) => {
       import("stompjs").then(({ default: Stomp }) => {
         const socket = new SockJS(`${WS_URL}?token=${token}`);
         const client = Stomp.over(socket);
 
         client.debug = null;
+        client.heartbeat.outgoing = 20000;
+        client.heartbeat.incoming = 20000;
 
         client.connect(
           {},
@@ -61,7 +64,7 @@ export function useWebSocket() {
       return;
     }
 
-    const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+    const delay = Math.min(3000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
     reconnectAttemptsRef.current++;
 
     reconnectTimeoutRef.current = setTimeout(() => {
