@@ -113,7 +113,7 @@ public class ListingService {
         return mapToListingPageResponse(listingPage, null);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ListingResponse getListingDetail(Long id, User currentUser) {
         var listing = listingRepository.findByIdWithDetails(id)
             .orElseThrow(() -> ApiException.notFound("Listing not found"));
