@@ -84,7 +84,7 @@ public class ListingService {
             .toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PageResponse<ListingResponse> searchListings(String query, Long categoryId,
                                                          BigDecimal minPrice, BigDecimal maxPrice,
                                                          Long campusLocationId, String listingType,
