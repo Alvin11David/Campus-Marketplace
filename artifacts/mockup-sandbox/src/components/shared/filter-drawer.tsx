@@ -27,11 +27,12 @@ interface FilterDrawerProps {
 export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: FilterDrawerProps) {
   const [open, setOpen] = useState(false);
   const [locations, setLocations] = useState<CampusLocation[]>([]);
+  const [draftFilters, setDraftFilters] = useState(filters);
 
   useEffect(() => { fetchLocations().then(setLocations); }, []);
 
   const clearAll = () => {
-    onFiltersChange({
+    setDraftFilters({
       minPrice: "",
       maxPrice: "",
       campusLocation: "",
@@ -69,16 +70,16 @@ export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: Filt
               <Input
                 type="number"
                 placeholder="Min"
-                value={filters.minPrice}
-                onChange={(e) => onFiltersChange({ ...filters, minPrice: e.target.value })}
+                value={draftFilters.minPrice}
+                onChange={(e) => setDraftFilters({ ...draftFilters, minPrice: e.target.value })}
                 className="h-9"
               />
               <span className="text-muted-foreground">-</span>
               <Input
                 type="number"
                 placeholder="Max"
-                value={filters.maxPrice}
-                onChange={(e) => onFiltersChange({ ...filters, maxPrice: e.target.value })}
+                value={draftFilters.maxPrice}
+                onChange={(e) => setDraftFilters({ ...draftFilters, maxPrice: e.target.value })}
                 className="h-9"
               />
             </div>
@@ -89,8 +90,8 @@ export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: Filt
           <div className="space-y-3">
             <Label className="text-sm font-medium">Campus Location</Label>
             <Select
-              value={filters.campusLocation}
-              onValueChange={(v) => onFiltersChange({ ...filters, campusLocation: v })}
+              value={draftFilters.campusLocation}
+              onValueChange={(v) => setDraftFilters({ ...draftFilters, campusLocation: v })}
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All locations" />
@@ -111,8 +112,8 @@ export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: Filt
           <div className="space-y-3">
             <Label className="text-sm font-medium">Minimum Rating</Label>
             <Select
-              value={filters.minRating}
-              onValueChange={(v) => onFiltersChange({ ...filters, minRating: v })}
+              value={draftFilters.minRating}
+              onValueChange={(v) => setDraftFilters({ ...draftFilters, minRating: v })}
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Any rating" />
@@ -133,8 +134,8 @@ export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: Filt
           <div className="space-y-3">
             <Label className="text-sm font-medium">Sort By</Label>
             <Select
-              value={filters.sortBy}
-              onValueChange={(v) => onFiltersChange({ ...filters, sortBy: v })}
+              value={draftFilters.sortBy}
+              onValueChange={(v) => setDraftFilters({ ...draftFilters, sortBy: v })}
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Relevance" />
@@ -149,7 +150,7 @@ export function FilterDrawer({ filters, onFiltersChange, activeCount = 0 }: Filt
             </Select>
           </div>
 
-          <Button className="w-full" onClick={() => setOpen(false)}>
+          <Button className="w-full" onClick={() => { onFiltersChange(draftFilters); setOpen(false); }}>
             Apply Filters
           </Button>
         </div>
