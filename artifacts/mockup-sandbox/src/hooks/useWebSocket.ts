@@ -13,6 +13,7 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const clientRef = useRef<any>(null);
   const subscriptionsRef = useRef<Map<string, Subscription>>(new Map());
+  const pendingSubscriptionsRef = useRef<Map<string, MessageHandler>>(new Map());
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 3;
@@ -41,6 +42,18 @@ export function useWebSocket() {
               sub.unsubscribe();
             });
             subscriptionsRef.current.clear();
+            pendingSubscriptionsRef.current.forEach((handler, topic) => {
+              const sub = clientRef.current!.subscribe(topic, (message: any) => {
+                try {
+                  const payload = JSON.parse(message.body);
+                  handler(payload);
+                } catch {
+                  handler(message.body);
+                }
+              });
+              subscriptionsRef.current.set(topic, sub);
+            });
+            pendingSubscriptionsRef.current.clear();
           },
           (error: any) => {
             console.error("WebSocket connection error:", error);
@@ -74,14 +87,14 @@ export function useWebSocket() {
 
   const subscribe = useCallback((topic: string, handler: MessageHandler) => {
     if (!clientRef.current?.connected) {
-      return () => {};
+      pendingSubscriptionsRef.current.set(topic, handler);
+      return () => {
+        pendingSubscriptionsRef.current.delete(topic);
+      };
     }
-
-    const existing = subscriptionsRef.current.get(topic);
-    if (existing) {
-      existing.unsubscribe();
+    if (subscriptionsRef.current.has(topic)) {
+      subscriptionsRef.current.get(topic)?.unsubscribe();
     }
-
     const sub = clientRef.current.subscribe(topic, (message: any) => {
       try {
         const payload = JSON.parse(message.body);
@@ -90,9 +103,7 @@ export function useWebSocket() {
         handler(message.body);
       }
     });
-
     subscriptionsRef.current.set(topic, sub);
-
     return () => {
       sub.unsubscribe();
       subscriptionsRef.current.delete(topic);
