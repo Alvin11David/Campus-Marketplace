@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? "http://localhost:8080";
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? "https://backend-production-53d7.up.railway.app";
 const WS_URL = `${API_ORIGIN}/ws`;
 
 type MessageHandler = (message: any) => void;
