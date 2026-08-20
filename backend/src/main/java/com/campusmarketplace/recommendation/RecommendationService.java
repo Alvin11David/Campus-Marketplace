@@ -52,7 +52,7 @@ public class RecommendationService {
 
     @Transactional(readOnly = true)
     public List<ListingResponse> getRecommendations(User user, int page, int pageSize) {
-        user = userRepository.findById(user.getId()).orElseThrow();
+        user = userRepository.findByIdWithLocation(user.getId()).orElseThrow();
         var candidates = listingRepository.findActiveListingsExcluding(user.getId());
 
         String userZone = user.getCampusLocation() != null ? user.getCampusLocation().getZone() : null;
