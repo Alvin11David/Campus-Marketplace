@@ -148,8 +148,12 @@ public class ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getMyListings(User owner) {
         var listings = listingRepository.findByOwnerId(owner.getId());
+        var listingIds = listings.stream().map(Listing::getId).toList();
+        var allImages = listingImageRepository.findByListingIdIn(listingIds);
+        var imagesByListingId = allImages.stream()
+            .collect(Collectors.groupingBy(img -> img.getListing().getId()));
         return listings.stream().map(listing -> {
-            var images = listingImageRepository.findByListingIdOrderBySortOrderAsc(listing.getId());
+            var images = imagesByListingId.getOrDefault(listing.getId(), List.of());
             return ListingResponse.from(listing, images.stream()
                 .map(img -> new ListingResponse.ImageInfo(img.getId(), img.getImageUrl(), img.getSortOrder()))
                 .toList());
@@ -159,8 +163,12 @@ public class ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getUserListings(Long userId) {
         var listings = listingRepository.findByOwnerId(userId);
+        var listingIds = listings.stream().map(Listing::getId).toList();
+        var allImages = listingImageRepository.findByListingIdIn(listingIds);
+        var imagesByListingId = allImages.stream()
+            .collect(Collectors.groupingBy(img -> img.getListing().getId()));
         return listings.stream().map(listing -> {
-            var images = listingImageRepository.findByListingIdOrderBySortOrderAsc(listing.getId());
+            var images = imagesByListingId.getOrDefault(listing.getId(), List.of());
             return ListingResponse.from(listing, images.stream()
                 .map(img -> new ListingResponse.ImageInfo(img.getId(), img.getImageUrl(), img.getSortOrder()))
                 .toList());

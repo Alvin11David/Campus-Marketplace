@@ -15,7 +15,7 @@ export function useWebSocket() {
   const subscriptionsRef = useRef<Map<string, Subscription>>(new Map());
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 10;
+  const maxReconnectAttempts = 3;
 
   const connect = useCallback(() => {
     const token = localStorage.getItem("cm_token");
@@ -24,7 +24,7 @@ export function useWebSocket() {
     if (typeof global === "undefined") (window as any).global = window;
     import("sockjs-client").then(({ default: SockJS }) => {
       import("stompjs").then(({ default: Stomp }) => {
-        const socket = new SockJS(`${WS_URL}?token=${token}`);
+        const socket = new SockJS(`${WS_URL}?token=${token}`, null, { transports: ['websocket'] });
         const client = Stomp.over(socket);
 
         client.debug = null;

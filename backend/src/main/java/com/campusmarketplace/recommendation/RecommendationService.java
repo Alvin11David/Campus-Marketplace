@@ -8,6 +8,7 @@ import com.campusmarketplace.listing.ListingViewRepository;
 import com.campusmarketplace.listing.SearchLogRepository;
 import com.campusmarketplace.listing.dto.ListingResponse;
 import com.campusmarketplace.user.User;
+import com.campusmarketplace.user.UserRepository;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -33,21 +34,25 @@ public class RecommendationService {
     private final SearchLogRepository searchLogRepository;
     private final ListingViewRepository listingViewRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     public RecommendationService(ListingRepository listingRepository,
                                  ListingImageRepository listingImageRepository,
                                  SearchLogRepository searchLogRepository,
                                  ListingViewRepository listingViewRepository,
-                                 CategoryRepository categoryRepository) {
+                                 CategoryRepository categoryRepository,
+                                 UserRepository userRepository) {
         this.listingRepository = listingRepository;
         this.listingImageRepository = listingImageRepository;
         this.searchLogRepository = searchLogRepository;
         this.listingViewRepository = listingViewRepository;
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
     public List<ListingResponse> getRecommendations(User user, int page, int pageSize) {
+        user = userRepository.findById(user.getId()).orElseThrow();
         var candidates = listingRepository.findActiveListingsExcluding(user.getId());
 
         String userZone = user.getCampusLocation() != null ? user.getCampusLocation().getZone() : null;
