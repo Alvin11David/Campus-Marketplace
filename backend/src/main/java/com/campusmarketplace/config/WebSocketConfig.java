@@ -34,7 +34,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-            .setAllowedOrigins(frontendUrl, "http://localhost:5173", "http://localhost:3000")
+            .setAllowedOrigins(frontendUrl, "https://www.compusmarketplace.site", "https://compusmarketplace.site", "http://localhost:5173", "http://localhost:3000")
             .addInterceptors(new JwtHandshakeInterceptor(jwtTokenProvider, userDetailsService))
             .withSockJS();
     }
