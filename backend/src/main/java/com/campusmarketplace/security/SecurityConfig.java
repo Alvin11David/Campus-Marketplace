@@ -61,7 +61,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(frontendUrl, "http://localhost:5173", "http://localhost:*", "https://localhost:*"));
+        configuration.setAllowedOriginPatterns(List.of(
+            frontendUrl,
+            "https://www.compusmarketplace.site",
+            "https://compusmarketplace.site",
+            "http://localhost:5173",
+            "http://localhost:*",
+            "https://localhost:*"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
