@@ -127,7 +127,7 @@ export default function Dashboard() {
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/[0.04] rounded-full blur-3xl" />
           <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-amber-500/[0.03] rounded-full blur-3xl" />
         </div>
-        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-16 4xl:px-20">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-16 4xl:px-20">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
@@ -159,7 +159,7 @@ export default function Dashboard() {
 
       {/* ── Overview Bento ── */}
       <section className="bg-muted border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-12 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-16 4xl:px-20">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-16 4xl:px-20">
           <div className="flex items-center gap-3 mb-7">
             <div className="flex items-center gap-2.5">
               <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground shadow-sm">

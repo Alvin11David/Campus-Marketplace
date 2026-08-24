@@ -123,7 +123,7 @@ export function StarsBackground({
       data-slot="stars-background"
       className={cn(
         "relative size-full overflow-hidden",
-        "bg-[radial-gradient(ellipse_at_bottom,_#e5e7eb_0%,_#fafafa_100%)]",
+        "bg-[radial-gradient(ellipse_at_bottom,_hsl(var(--primary)/0.14)_0%,_hsl(var(--secondary)/0.10)_45%,_hsl(var(--background))_100%)]",
         "dark:bg-[radial-gradient(ellipse_at_bottom,_#262626_0%,_#000_100%)]",
         className,
       )}

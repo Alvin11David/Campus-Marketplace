@@ -641,7 +641,7 @@ export default function ConversationPage() {
         className="flex-1 relative"
         onScroll={handleScroll}
       >
-        <div className="px-4 py-4 space-y-1 max-w-2xl mx-auto">
+        <div className="px-4 pt-2 pb-4 space-y-1 max-w-2xl mx-auto">
           {messages.length === 0 ? (
             <CartoonEmpty
               variant="message"

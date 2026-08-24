@@ -547,7 +547,7 @@ export default function ListingDetailPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <Card className="border-primary/5">
             <CardHeader>
               <CardTitle>Provider</CardTitle>
